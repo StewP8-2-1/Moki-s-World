@@ -16,60 +16,43 @@ export class GalleryScene extends Phaser.Scene {
     this.load.image('art-news', 'news of the world.jpg');
     this.load.image('art-say', 'say i am you.jpg');
     this.load.image('art-blue', 'Thank you blue.jpg');
-
   }
 
   create() {
-
-    // Tell the physics engine the new boundaries
     // 1. Expand the World Width
     const worldWidth = 2400; // Increased from 900
     const worldHeight = 900;
 
     // Tell the physics engine the new boundaries
     this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
-    this.physics.world.gravity.y = 600;
-
+    
     // Side-scroll physics (gravity enabled)
     this.physics.world.gravity.y = 600;
 
- // ==========================================
+    // ==========================================
     // PARALLAX BACKGROUND LAYERS
     // ==========================================
     // Layer 1: Deep Background (Moves very slowly: 20% speed)
-    // Using a dark grey rectangle to represent a back wall
     this.add.rectangle(0, 0, worldWidth * 1.5, worldHeight, 0xffffff)
         .setOrigin(0, 0)
         .setDepth(-5)
         .setScrollFactor(0.2); 
 
-
-
     // ==========================================
     // EXPANDED PLATFORM / GROUND
     // ==========================================
-    // Center X is now worldWidth / 2. Width is now worldWidth.
     const groundRect = this.add.rectangle(worldWidth / 2, 580, worldWidth, 40, 0x000000);
     this.ground = this.physics.add.existing(groundRect, true);
 
-// ==========================================
+    // ==========================================
     // PLAYER SETUP
     // ==========================================
-
-    // FIX 2: Create a solid, visible rectangle for the player
     this.player = this.physics.add.sprite(100, 538, 'player-side');
     this.player.setScale(0.25); 
     this.player.setSize(200, 190);
-
-    // ==========================================
-    // CAMERA SETUP (REQUIRED FOR PARALLAX)
-    // ==========================================
-    // Stop the camera from showing the void outside the new 2400px width
-    this.cameras.main.setBounds(0, 0, worldWidth, worldHeight);
-    
-    // Smoothly follow the player 
-    this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
-
+    this.physics.add.existing(this.player, false);
+    this.player.body.setCollideWorldBounds(true);
+    this.physics.add.collider(this.player, this.ground);
 
     this.anims.create({
       key: 'walk-side',
@@ -79,95 +62,121 @@ export class GalleryScene extends Phaser.Scene {
     });
 
     // ==========================================
+    // CAMERA SETUP
+    // ==========================================
+    this.cameras.main.setBounds(0, 0, worldWidth, worldHeight);
+    this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+
+    // ==========================================
     // ADD GALLERY ARTWORK (BACKGROUND)
     // ==========================================
-    const artSize = 160; // Forces all images to be 160x160 squares
-    const heightOnWall = 350; // Y coordinate (lower number = higher on the wall)
+    const artSize = 160; 
+    const heightOnWall = 350; 
 
-    // Left Frame
-    this.add.image(250, heightOnWall, 'art-news')
-        .setDisplaySize(artSize, artSize)
-        .setDepth(-1); // Forces it to the background
+    this.add.image(250, heightOnWall, 'art-news').setDisplaySize(artSize, artSize).setDepth(-1);
+    this.add.image(450, heightOnWall, 'art-say').setDisplaySize(artSize, artSize).setDepth(-1);
+    this.add.image(650, heightOnWall, 'art-blue').setDisplaySize(artSize, artSize).setDepth(-1);
 
-    // Center Frame
-    this.add.image(450, heightOnWall, 'art-say')
-        .setDisplaySize(artSize, artSize)
-        .setDepth(-1);
-
-    // Right Frame
-    this.add.image(650, heightOnWall, 'art-blue')
-        .setDisplaySize(artSize, artSize)
-        .setDepth(-1);
-
-    
-    // Add a DYNAMIC physics body to the player
-    this.physics.add.existing(this.player, false);
-
-    // FIX 3: Prevent the player from falling out of the screen completely
-    this.player.body.setCollideWorldBounds(true);
-
-    // Enable collision between the player and the ground
-    this.physics.add.collider(this.player, this.ground);
-
+    // ==========================================
+    // INPUTS (KEYBOARD)
+    // ==========================================
     this.cursors = this.input.keyboard.createCursorKeys();
-
     this.keys = this.input.keyboard.addKeys({
         up: Phaser.Input.Keyboard.KeyCodes.W,
         down: Phaser.Input.Keyboard.KeyCodes.S,
         left: Phaser.Input.Keyboard.KeyCodes.A,
         right: Phaser.Input.Keyboard.KeyCodes.D,
         space: Phaser.Input.Keyboard.KeyCodes.SPACE
+    });
 
-        });
-
-    // 1. staticSprite makes it ignore gravity
-    // 2. Positioned at X:40, Y:520 (physically behind the player and resting on the ground)
+    // ==========================================
+    // PORTAL SETUP
+    // ==========================================
     this.hubPortal = this.physics.add.staticSprite(40, 520, 'portal');
-    
-    // 3. Set depth to 0 (draws under the player)
     this.hubPortal.setDepth(0);
 
-    // Move the text to float right above the portal
     this.add.text(80, 480, 'Return to Moki\'s Hub', { 
-      fontSize: '16px', // Scaled down slightly to fit better
-      fill: '#000000', 
-      fontFamily: 'Arial',
-      fontStyle: 'bold'
+      fontSize: '16px', fill: '#000000', fontFamily: 'Arial', fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    // Optional: Actually trigger the scene change when the player touches the portal
     this.physics.add.overlap(this.player, this.hubPortal, this.returnToHub, null, this);
 
+    // ==========================================
+    // NEW: MOBILE VIRTUAL CONTROLS (PLATFORMER STYLE)
+    // ==========================================
+    this.input.addPointer(2); // Enable multi-touch
+    this.mobileControls = { left: false, right: false, jump: false };
+
+    const { width, height } = this.cameras.main;
+
+    // Left/Right buttons on the bottom left
+    this.createMobileBtn(70, height - 70, 'A', 'left', 60, 60);
+    this.createMobileBtn(150, height - 70, 'D', 'right', 60, 60);
+    
+    // Jump button on the bottom right (made slightly wider)
+    this.createMobileBtn(width - 90, height - 70, 'JUMP', 'jump', 100, 60);
   }
 
-update() {
+  // Helper function to create interactive UI buttons
+  createMobileBtn(x, y, label, key, btnWidth, btnHeight) {
+    const btn = this.add.rectangle(x, y, btnWidth, btnHeight, 0x000000, 0.3)
+      .setScrollFactor(0)
+      .setInteractive()
+      .setDepth(100);
+
+    this.add.text(x, y, label, { fontSize: '20px', fill: '#ffffff', fontStyle: 'bold' })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(101);
+
+    btn.on('pointerdown', () => { 
+      this.mobileControls[key] = true; 
+      btn.setFillStyle(0x000000, 0.6); 
+    });
+    
+    btn.on('pointerup', () => { 
+      this.mobileControls[key] = false; 
+      btn.setFillStyle(0x000000, 0.3); 
+    });
+    
+    btn.on('pointerout', () => { 
+      this.mobileControls[key] = false; 
+      btn.setFillStyle(0x000000, 0.3); 
+    });
+  }
+
+  update() {
     const speed = 200;
     const jumpPower = 400;
-    let isMoving = false; // Track if we are moving horizontally
+    let isMoving = false; 
 
-    // We can use .setVelocityX directly on the sprite now!
     this.player.setVelocityX(0); 
 
+    // ==========================================
+    // UNIFIED INPUT CHECK (Keyboard + Mobile)
+    // ==========================================
+    const isLeft = this.cursors.left.isDown || this.keys.left.isDown || this.mobileControls.left;
+    const isRight = this.cursors.right.isDown || this.keys.right.isDown || this.mobileControls.right;
+    const isJump = this.keys.space.isDown 
     // Left/Right Movement
-    if (this.cursors.left.isDown || this.keys.left.isDown) {
+    if (isLeft) {
       this.player.setVelocityX(-speed);
       this.player.setFlipX(true); // Flip to face LEFT
       isMoving = true;
     } 
-    else if (this.cursors.right.isDown || this.keys.right.isDown) {
+    else if (isRight) {
       this.player.setVelocityX(speed);
       this.player.setFlipX(false); // Face RIGHT (Default)
       isMoving = true;
     }
 
-    // Jump Logic
-    if (( this.keys.space.isDown) && this.player.body.touching.down) {
+    // Jump Logic (Must be pressing jump AND touching the ground)
+    if (isJump && this.player.body.touching.down) {
       this.player.setVelocityY(-jumpPower);
     }
 
     // Animation Logic
     if (isMoving) {
-      // 'true' stops it from restarting the animation if it's already playing
       this.player.anims.play('walk-side', true); 
     } else {
       this.player.anims.stop();
@@ -175,9 +184,7 @@ update() {
     }
   }
 
-  // Optional: Function to handle going back to the hub
   returnToHub() {
     this.scene.start('HubScene');
   }
-    
 }
