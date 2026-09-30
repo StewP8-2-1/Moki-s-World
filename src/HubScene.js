@@ -7,12 +7,12 @@ export class HubScene extends Phaser.Scene {
 
   preload() {
     // Note: You will need to load your images here or in main.js
-   this.load.spritesheet('player', 'public/Moki TYB.png', {
+   this.load.spritesheet('player', 'Moki TYB.png', {
       frameWidth: 512,
       frameHeight: 512
     });
 
-    this.load.spritesheet('playerFront', 'public/Moki TYB Front.png', {
+    this.load.spritesheet('playerFront', 'Moki TYB Front.png', {
       frameWidth: 512,
       frameHeight: 512
     });

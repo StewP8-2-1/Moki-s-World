@@ -7,15 +7,15 @@ export class GalleryScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.spritesheet('player-side', 'public/Moki (side).png', {
+    this.load.spritesheet('player-side', 'Moki (side).png', {
       frameWidth: 512,
       frameHeight: 512
     });
 
     // Load the gallery artwork
-    this.load.image('art-news', 'public/news of the world.jpg');
-    this.load.image('art-say', 'public/say i am you.jpg');
-    this.load.image('art-blue', 'public/Thank you blue.jpg');
+    this.load.image('art-news', 'news of the world.jpg');
+    this.load.image('art-say', 'say i am you.jpg');
+    this.load.image('art-blue', 'Thank you blue.jpg');
 
   }
 
