@@ -74,6 +74,25 @@ export class HubScene extends Phaser.Scene {
       frameRate: 4
     });
 
+    // ==========================================
+    // 7. NEW: MOBILE VIRTUAL D-PAD SETUP
+    // ==========================================
+    
+    // Allow up to 2 fingers on screen at once (multi-touch)
+    this.input.addPointer(2); 
+    this.mobileControls = { up: false, down: false, left: false, right: false };
+
+    // Get the visible screen dimensions to place the D-pad in the bottom-left corner
+    const { width, height } = this.cameras.main;
+
+    // Create the 4 directional buttons
+    this.createMobileBtn(120, height - 160, 'W', 'up');
+    this.createMobileBtn(120, height - 60, 'S', 'down');
+    this.createMobileBtn(50, height - 110, 'A', 'left');
+    this.createMobileBtn(190, height - 110, 'D', 'right');
+
+    
+
 
     // 3. Place Portals Off-Screen
     // Placing these far beyond the 800x600 starting view forces the player to explore
@@ -104,74 +123,80 @@ export class HubScene extends Phaser.Scene {
     
   }
 
+  // Helper function to create interactive UI buttons
+  createMobileBtn(x, y, label, key) {
+    // Create a square button. .setScrollFactor(0) keeps it glued to the UI!
+    const btn = this.add.rectangle(x, y, 60, 60, 0x000000, 0.3)
+      .setScrollFactor(0)
+      .setInteractive()
+      .setDepth(100); // Ensures it renders above players and portals
+
+    this.add.text(x, y, label, { fontSize: '24px', fill: '#ffffff', fontStyle: 'bold' })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(101);
+
+    // Event listeners for touch/click
+    btn.on('pointerdown', () => { 
+      this.mobileControls[key] = true; 
+      btn.setFillStyle(0x000000, 0.6); // Darken when pressed
+    });
+    
+    // Reset when finger lifts or slides off the button
+    btn.on('pointerup', () => { 
+      this.mobileControls[key] = false; 
+      btn.setFillStyle(0x000000, 0.3); 
+    });
+    btn.on('pointerout', () => { 
+      this.mobileControls[key] = false; 
+      btn.setFillStyle(0x000000, 0.3); 
+    });
+  }
+
   update() {
     const speed = 300; // Increased speed for the larger map
     this.player.setVelocity(0);
 
-    // 4-Way Movement
-    if (this.cursors.left.isDown) this.player.setVelocityX(-speed);
-    else if (this.cursors.right.isDown) this.player.setVelocityX(speed);
-
-    if (this.cursors.up.isDown) this.player.setVelocityY(-speed);
-    else if (this.cursors.down.isDown) this.player.setVelocityY(speed);
+    // ==========================================
+    // UNIFIED INPUT CHECK
+    // This checks Arrows, WASD, OR Mobile touches all at once.
+    // ==========================================
+    const isLeft = this.cursors.left.isDown || this.keys.left.isDown || this.mobileControls.left;
+    const isRight = this.cursors.right.isDown || this.keys.right.isDown || this.mobileControls.right;
+    const isUp = this.cursors.up.isDown || this.keys.up.isDown || this.mobileControls.up;
+    const isDown = this.cursors.down.isDown || this.keys.down.isDown || this.mobileControls.down;
 
     let isMoving = false;
     let isMovingDown = false;
 
     // Left/Right Movement
-    if (this.cursors.left.isDown) {
+    if (isLeft) {
       this.player.setVelocityX(-speed);
-      this.player.setFlipX(true); // Flips the sprite horizontally when walking left
+      this.player.setFlipX(true); 
       isMoving = true;
-    } 
-    else if (this.cursors.right.isDown) {
+    } else if (isRight) {
       this.player.setVelocityX(speed);
-      this.player.setFlipX(false); // Resets the flip when walking right
+      this.player.setFlipX(false); 
       isMoving = true;
     }
 
     // Up/Down Movement
-    if (this.cursors.up.isDown) {
-      this.player.setVelocityY(-speed);
-      isMovingDown = true;
-    } 
-    else if (this.cursors.down.isDown) {
-      this.player.setVelocityY(speed);
-      isMoving = true;
-    }
-
-    // Left/Right Movement (A and D)
-    if (this.keys.left.isDown && !(this.keys.up.isDown || this.keys.down.isDown)) {
-      this.player.setVelocityX(-speed);
-      this.player.setFlipX(false); // Face LEFT (Default)
-      isMovingDown = true;
-    } 
-    else if (this.keys.right.isDown && !(this.keys.up.isDown || this.keys.down.isDown)) {
-      this.player.setVelocityX(speed);
-      this.player.setFlipX(true); 
-      isMovingDown = true;
-    }
-
-    // Up/Down Movement (W and S)
-    if (this.keys.up.isDown) {
+    if (isUp) {
       this.player.setVelocityY(-speed);
       isMoving = true;
-    } 
-    else if (this.keys.down.isDown || (this.keys.down.isDown && this.keys.left.isDown) || (this.keys.down.isDown && this.keys.right.isDown)) {
+    } else if (isDown) {
       this.player.setVelocityY(speed);
       isMovingDown = true;
     }
 
-    // 4. Play or Stop the Animation
+    // Play/Stop Animations based on the unified movement booleans
     if (isMoving) {
-      // The 'true' argument is critical: it tells Phaser NOT to restart the animation if it's already playing
       this.player.anims.play('walk', true); 
     } else if (isMovingDown) {
-         this.player.anims.play('walk-down', true); 
-    }
-    else {
+      this.player.anims.play('walk-down', true); 
+    } else {
       this.player.anims.stop();
-      this.player.setFrame(0); // Resets to the top-left frame when standing still
+      this.player.setFrame(0); 
     }
 
     // Optional: Add ambient movement to the parallax layer
