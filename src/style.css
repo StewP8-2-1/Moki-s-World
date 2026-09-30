@@ -1,0 +1,31 @@
+/* Reset margins and prevent scrolling */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; 
+  background-color: #000000; /* Fills empty space with black if aspect ratios differ */
+}
+
+/* Ensure the container takes up the full screen */
+#game-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Optional: Position your UI layer over the canvas */
+#ui-layer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Centers the UI overlay */
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+}

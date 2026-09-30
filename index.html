@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mokis-world</title>
+     <link rel="stylesheet" href="./src/style.css">
+  </head>
+
+  <body>
+ <!-- Phaser will inject the game canvas here -->
+    <div id="game-container"></div>
+    
+    <!-- HTML Overlay for Art/Merch info (hidden by default) -->
+    <div id="ui-layer" style="display: none;">
+      <h2 id="ui-title">Art Title</h2>
+      <button id="ui-action">View Details</button>
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
