@@ -173,11 +173,11 @@ export class HubScene extends Phaser.Scene {
     if (isLeft) {
       this.player.setVelocityX(-speed);
       this.player.setFlipX(true); 
-      isMoving = true;
+      isMovingDown = true;
     } else if (isRight) {
       this.player.setVelocityX(speed);
       this.player.setFlipX(false); 
-      isMoving = true;
+      isMovingDown = true;
     }
 
     // Up/Down Movement
