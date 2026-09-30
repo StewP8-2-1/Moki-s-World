@@ -157,7 +157,8 @@ export class GalleryScene extends Phaser.Scene {
     // ==========================================
     const isLeft = this.cursors.left.isDown || this.keys.left.isDown || this.mobileControls.left;
     const isRight = this.cursors.right.isDown || this.keys.right.isDown || this.mobileControls.right;
-    const isJump = this.keys.space.isDown 
+    const isJump = this.keys.space.isDown || this.cursors.up.isDown || this.keys.up.isDown || this.mobileControls.jump;
+
     // Left/Right Movement
     if (isLeft) {
       this.player.setVelocityX(-speed);
