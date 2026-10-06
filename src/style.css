@@ -12,6 +12,9 @@ html, body {
 #game-container {
   width: 100vw;
   height: 100vh;
+  display: flex;             /* CSS handles centering */
+  justify-content: center;   /* Center horizontally perfectly */
+  align-items: center;
 }
 
 /* Optional: Position your UI layer over the canvas */
@@ -27,3 +30,6 @@ html, body {
   border-radius: 10px;
 }
 
+canvas {
+  display: block;
+}

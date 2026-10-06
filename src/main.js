@@ -13,8 +13,7 @@ const config = {
     // FIT maintains aspect ratio and scales the canvas to fit the window
     mode: Phaser.Scale.FIT, 
 
-    // Centers the game canvas both horizontally and vertically
-    autoCenter: Phaser.Scale.CENTER_BOTH, 
+    autoCenter: Phaser.Scale.NO_CENTER,
 
     // Your base game resolution (Phaser scales this up or down)
     width: GAME_CONFIG.width,  
