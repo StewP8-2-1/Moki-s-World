@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_CONFIG } from './constants';
+import { PlatformerController } from './GameControllers';
 
 export class GalleryScene extends Phaser.Scene {
     
@@ -79,16 +80,13 @@ export class GalleryScene extends Phaser.Scene {
     this.add.image(650, heightOnWall, 'art-blue').setDisplaySize(artSize, artSize).setDepth(-1);
 
     // ==========================================
-    // INPUTS (KEYBOARD)
+    // INITIALIZE PLATFORMER CONTROLS HERE
+    // Pass 'this' (the scene), the player sprite, speed (200), and jump power (400)
     // ==========================================
-    this.cursors = this.input.keyboard.createCursorKeys();
-    this.keys = this.input.keyboard.addKeys({
-        up: Phaser.Input.Keyboard.KeyCodes.W,
-        down: Phaser.Input.Keyboard.KeyCodes.S,
-        left: Phaser.Input.Keyboard.KeyCodes.A,
-        right: Phaser.Input.Keyboard.KeyCodes.D,
-        space: Phaser.Input.Keyboard.KeyCodes.SPACE
-    });
+    this.controls = new PlatformerController(this, this.player, 200, 400);
+
+    // 2. Generate the settings menu automatically
+    this.controls.createBurgerMenu();
 
     // ==========================================
     // PORTAL SETUP
@@ -102,88 +100,14 @@ export class GalleryScene extends Phaser.Scene {
 
     this.physics.add.overlap(this.player, this.hubPortal, this.returnToHub, null, this);
 
-    // ==========================================
-    // NEW: MOBILE VIRTUAL CONTROLS (PLATFORMER STYLE)
-    // ==========================================
-    this.input.addPointer(2); // Enable multi-touch
-    this.mobileControls = { left: false, right: false, jump: false };
-
-    const { width, height } = this.cameras.main;
-
-    // Left/Right buttons on the bottom left
-    this.createMobileBtn(70, height - 70, 'A', 'left', 60, 60);
-    this.createMobileBtn(150, height - 70, 'D', 'right', 60, 60);
-    
-    // Jump button on the bottom right (made slightly wider)
-    this.createMobileBtn(width - 90, height - 70, 'JUMP', 'jump', 100, 60);
-  }
-
-  // Helper function to create interactive UI buttons
-  createMobileBtn(x, y, label, key, btnWidth, btnHeight) {
-    const btn = this.add.rectangle(x, y, btnWidth, btnHeight, 0x000000, 0.3)
-      .setScrollFactor(0)
-      .setInteractive()
-      .setDepth(100);
-
-    this.add.text(x, y, label, { fontSize: '20px', fill: '#ffffff', fontStyle: 'bold' })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(101);
-
-    btn.on('pointerdown', () => { 
-      this.mobileControls[key] = true; 
-      btn.setFillStyle(0x000000, 0.6); 
-    });
-    
-    btn.on('pointerup', () => { 
-      this.mobileControls[key] = false; 
-      btn.setFillStyle(0x000000, 0.3); 
-    });
-    
-    btn.on('pointerout', () => { 
-      this.mobileControls[key] = false; 
-      btn.setFillStyle(0x000000, 0.3); 
-    });
   }
 
   update() {
     const speed = 200;
     const jumpPower = 400;
-    let isMoving = false; 
-
     this.player.setVelocityX(0); 
 
-    // ==========================================
-    // UNIFIED INPUT CHECK (Keyboard + Mobile)
-    // ==========================================
-    const isLeft = this.cursors.left.isDown || this.keys.left.isDown || this.mobileControls.left;
-    const isRight = this.cursors.right.isDown || this.keys.right.isDown || this.mobileControls.right;
-    const isJump = this.keys.space.isDown || this.cursors.up.isDown || this.keys.up.isDown || this.mobileControls.jump;
-
-    // Left/Right Movement
-    if (isLeft) {
-      this.player.setVelocityX(-speed);
-      this.player.setFlipX(true); // Flip to face LEFT
-      isMoving = true;
-    } 
-    else if (isRight) {
-      this.player.setVelocityX(speed);
-      this.player.setFlipX(false); // Face RIGHT (Default)
-      isMoving = true;
-    }
-
-    // Jump Logic (Must be pressing jump AND touching the ground)
-    if (isJump && this.player.body.touching.down) {
-      this.player.setVelocityY(-jumpPower);
-    }
-
-    // Animation Logic
-    if (isMoving) {
-      this.player.anims.play('walk-side', true); 
-    } else {
-      this.player.anims.stop();
-      this.player.setFrame(0); // Reset to standing frame when idle
-    }
+    this.controls.update();
   }
 
   returnToHub() {

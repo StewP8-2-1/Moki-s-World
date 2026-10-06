@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_CONFIG } from './constants';
-
+import { TopDownController } from './GameControllers';
+  
 export class HubScene extends Phaser.Scene {
   constructor() {
     super('HubScene');
@@ -59,13 +60,14 @@ export class HubScene extends Phaser.Scene {
       repeat: -1    // -1 tells it to loop forever
     });
     
-    // 3. Setup WASD Keys instead of Cursor Keys
-    this.keys = this.input.keyboard.addKeys({
-      up: Phaser.Input.Keyboard.KeyCodes.W,
-      down: Phaser.Input.Keyboard.KeyCodes.S,
-      left: Phaser.Input.Keyboard.KeyCodes.A,
-      right: Phaser.Input.Keyboard.KeyCodes.D
-    });
+    // ==========================================
+    // INITIALIZE CONTROLS HERE
+    // Pass 'this' (the scene) and the player sprite. 300 is the speed.
+    // ==========================================
+    this.controls = new TopDownController(this, this.player, 300);
+
+    // 2. Generate the settings menu automatically
+    this.controls.createBurgerMenu();
 
     // Alternatively, if each frame represents a specific direction:
     // Frame 0 = down, Frame 1 = up, Frame 2 = left, Frame 3 = right
@@ -75,24 +77,6 @@ export class HubScene extends Phaser.Scene {
       frameRate: 4
     });
 
-    // ==========================================
-    // 7. NEW: MOBILE VIRTUAL D-PAD SETUP
-    // ==========================================
-    
-    // Allow up to 2 fingers on screen at once (multi-touch)
-    this.input.addPointer(2); 
-    this.mobileControls = { up: false, down: false, left: false, right: false };
-
-    // Get the visible screen dimensions to place the D-pad in the bottom-left corner
-    const { width, height } = this.cameras.main;
-
-    // Create the 4 directional buttons
-    this.createMobileBtn(120, height - 160, 'W', 'up');
-    this.createMobileBtn(120, height - 60, 'S', 'down');
-    this.createMobileBtn(50, height - 110, 'A', 'left');
-    this.createMobileBtn(190, height - 110, 'D', 'right');
-
-    
 
 
     // 3. Place Portals Off-Screen
@@ -115,96 +99,19 @@ export class HubScene extends Phaser.Scene {
     // Tell the camera to follow the player. 
     // The (true, 0.1, 0.1) adds a smooth, cinematic glide to the camera.
     this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
-
-    // Setup controls and overlaps
-    this.cursors = this.input.keyboard.createCursorKeys();
     
     this.physics.add.overlap(this.player, this.makiPortal, this.enterGallery, null, this);
     this.physics.add.overlap(this.player, this.merchPortal, this.enterMerch, null, this);
     
   }
 
-  // Helper function to create interactive UI buttons
-  createMobileBtn(x, y, label, key) {
-    // Create a square button. .setScrollFactor(0) keeps it glued to the UI!
-    const btn = this.add.rectangle(x, y, 60, 60, 0x000000, 0.3)
-      .setScrollFactor(0)
-      .setInteractive()
-      .setDepth(100); // Ensures it renders above players and portals
-
-    this.add.text(x, y, label, { fontSize: '24px', fill: '#ffffff', fontStyle: 'bold' })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(101);
-
-    // Event listeners for touch/click
-    btn.on('pointerdown', () => { 
-      this.mobileControls[key] = true; 
-      btn.setFillStyle(0x000000, 0.6); // Darken when pressed
-    });
-    
-    // Reset when finger lifts or slides off the button
-    btn.on('pointerup', () => { 
-      this.mobileControls[key] = false; 
-      btn.setFillStyle(0x000000, 0.3); 
-    });
-    btn.on('pointerout', () => { 
-      this.mobileControls[key] = false; 
-      btn.setFillStyle(0x000000, 0.3); 
-    });
-  }
-
   update() {
     const speed = 300; // Increased speed for the larger map
     this.player.setVelocity(0);
 
-    // ==========================================
-    // UNIFIED INPUT CHECK
-    // This checks Arrows, WASD, OR Mobile touches all at once.
-    // ==========================================
-    const isLeft = this.cursors.left.isDown || this.keys.left.isDown || this.mobileControls.left;
-    const isRight = this.cursors.right.isDown || this.keys.right.isDown || this.mobileControls.right;
-    const isUp = this.cursors.up.isDown || this.keys.up.isDown || this.mobileControls.up;
-    const isDown = this.cursors.down.isDown || this.keys.down.isDown || this.mobileControls.down;
+    // Delegate the movement logic to the controller module
+    this.controls.update();
 
-    let isMoving = false;
-    let isMovingDown = false;
-
-    // Left/Right Movement
-    if (isLeft) {
-      this.player.setVelocityX(-speed);
-      this.player.setFlipX(false); // Face LEFT
-      isMovingDown = true;
-    } else if (isRight) {
-      this.player.setVelocityX(speed);
-      this.player.setFlipX(true); 
-      isMovingDown = true;
-    }
-
-    // Up/Down Movement
-    if (isUp) {
-      this.player.setVelocityY(-speed);
-      isMoving = true;
-    } else if (isDown) {
-      this.player.setVelocityY(speed);
-      isMovingDown = true;
-    }
-
-    // Play/Stop Animations based on the unified movement booleans
-    if (isMoving) {
-      this.player.anims.play('walk', true); 
-    } else if (isMovingDown) {
-      this.player.anims.play('walk-down', true); 
-    } else {
-      this.player.anims.stop();
-      this.player.setFrame(0); 
-    }
-
-    // Optional: Add ambient movement to the parallax layer
-    // This makes the clouds slowly drift across the screen even when the player stands still
-    if (this.overheadClouds) {
-        this.overheadClouds.x -= 0.2;
-    }
   }
 
   enterGallery() {
