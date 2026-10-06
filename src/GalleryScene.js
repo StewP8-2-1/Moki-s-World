@@ -18,6 +18,8 @@ export class GalleryScene extends Phaser.Scene {
     this.load.image('art-news', 'news of the world.jpg');
     this.load.image('art-say', 'say i am you.jpg');
     this.load.image('art-blue', 'Thank you blue.jpg');
+
+    
   }
 
   create() {

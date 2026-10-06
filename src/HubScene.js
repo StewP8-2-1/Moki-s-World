@@ -18,6 +18,11 @@ export class HubScene extends Phaser.Scene {
       frameWidth: 512,
       frameHeight: 512
     });
+
+    // Load the Facebook image
+    this.load.image('facebookIcon', 'Facebook.png');
+    this.load.image('twitterIcon', 'Twitter.png');
+    this.load.image('IGIcon', 'IG.png');
     
     // this.load.image('portal', 'path/to/portal.png');
     // this.load.image('clouds', 'path/to/clouds.png');
@@ -76,6 +81,83 @@ export class HubScene extends Phaser.Scene {
       frames: [{ key: 'player', frame: 0 }],
       frameRate: 4
     });
+
+    // ==========================================
+    //  INTERACTABLE LINKS OBJECT
+    // ==========================================
+    // Place it physically above the player spawn (e.g., y = 200)
+    this.facebookBtn = this.add.sprite(400, 180, 'facebookIcon');
+    
+    // Optional: Scale it down if the raw image is too large
+    this.facebookBtn.setScale(0.5); 
+    
+    // Make it clickable/touchable with a hand cursor on hover
+    this.facebookBtn.setInteractive({ useHandCursor: true });
+    
+    // Open new tab on click/touch
+    this.facebookBtn.on('pointerdown', () => {
+      // Replace with your actual Facebook profile/page URL
+      window.open('https://www.facebook.com/yyessa.v', '_blank');
+    });
+
+    // Optional label above the Facebook icon
+    this.add.text(400, 100, 'Follow on Facebook!', { 
+      fontSize: '18px', 
+      fill: '#000000', 
+      fontFamily: 'Arial',
+      fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    this.twtBtn = this.add.sprite(200, 180, 'twitterIcon');
+    
+    // Optional: Scale it down if the raw image is too large
+    this.twtBtn.setScale(0.5); 
+    
+    // Make it clickable/touchable with a hand cursor on hover
+    this.twtBtn.setInteractive({ useHandCursor: true });
+    
+    // Open new tab on click/touch
+    this.twtBtn.on('pointerdown', () => {
+      // Replace with your actual Twitter profile URL
+      window.open('https://twitter.com/ayessamoki', '_blank');
+    });
+
+    // Optional label above the Twitter icon
+    this.add.text(200, 100, 'Follow on Twitter!', { 
+      fontSize: '18px', 
+      fill: '#000000', 
+      fontFamily: 'Arial',
+      fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    this.igBtn = this.add.sprite(600, 180, 'IGIcon');
+    
+    // Optional: Scale it down if the raw image is too large
+    this.igBtn.setScale(0.5); 
+    
+    // Make it clickable/touchable with a hand cursor on hover
+    this.igBtn.setInteractive({ useHandCursor: true });
+    
+    // Open new tab on click/touch
+    this.igBtn.on('pointerdown', () => {
+      // Replace with your actual Instagram profile URL
+      window.open('https://www.instagram.com/ayessamoki', '_blank');
+    });
+
+    // Optional label above the Instagram icon
+    this.add.text(600, 100, 'Follow on Instagram!', { 
+      fontSize: '18px', 
+      fill: '#000000', 
+      fontFamily: 'Arial',
+      fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+
+
+
+
+
+    // ==========================================
 
 
 
