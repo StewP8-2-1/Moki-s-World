@@ -23,7 +23,7 @@ export class GalleryScene extends Phaser.Scene {
   create() {
 
     // 1. Expand the Game World dynamically
-    const { width: worldWidth, height: worldHeight } = GAME_CONFIG.worlds.hub; 
+    const { width: worldWidth, height: worldHeight } = GAME_CONFIG.worlds.gallery; 
     
     // Tell the physics engine the new boundaries
     this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
