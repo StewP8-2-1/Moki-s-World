@@ -13,7 +13,9 @@ html, body {
 /* Force the container to match the viewport size */
 #game-container {
   width: 100vw;
-  height: 100vh;
+  height: 100%;     /* Safe fallback for older devices */
+  height: 100dvh;   /* Modern fix: recalculates when the mobile URL bar appears! */
+  
   display: flex;             /* CSS handles centering */
   justify-content: center;   /* Center horizontally perfectly */
   align-items: center;
