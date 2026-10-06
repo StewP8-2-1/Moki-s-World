@@ -5,8 +5,6 @@ import { GAME_CONFIG } from './constants';
 
 const config = {
   type: Phaser.AUTO,
-  width: GAME_CONFIG.width,
-  height: GAME_CONFIG.height,
   parent: 'game-container', // Matches the div ID in index.html
   backgroundColor: '#ffffff',
 
