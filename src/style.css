@@ -12,9 +12,6 @@ html, body {
 #game-container {
   width: 100vw;
   height: 100vh;
-  display: flex;            /* Flexbox ensures absolute center alignment */
-  justify-content: center;
-  align-items: center;
 }
 
 /* Optional: Position your UI layer over the canvas */
@@ -29,3 +26,4 @@ html, body {
   padding: 20px;
   border-radius: 10px;
 }
+
