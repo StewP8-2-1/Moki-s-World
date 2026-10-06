@@ -21,13 +21,9 @@ export class GalleryScene extends Phaser.Scene {
 
   create() {
 
-// 1. Expand the Game World dynamically
-        const { GCwidth, GCheight } = GAME_CONFIG.worlds.hub; 
-        
-        // Example of applying it to the physics world bounds:
-        this.physics.world.setBounds(0, 0, GCwidth, GCheight);
-        this.cameras.main.setBounds(0, 0, GCwidth, GCheight);
-
+    // 1. Expand the Game World dynamically
+    const { width: worldWidth, height: worldHeight } = GAME_CONFIG.worlds.hub; 
+    
     // Tell the physics engine the new boundaries
     this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
     

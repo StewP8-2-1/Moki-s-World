@@ -23,17 +23,15 @@ export class HubScene extends Phaser.Scene {
   }
 
   create() {
-    this.physics.world.gravity.y = 0;
+   
 
- // 1. Expand the Game World dynamically
-        const { GCwidth, GCheight } = GAME_CONFIG.worlds.hub; 
-        
-        // Example of applying it to the physics world bounds:
-        this.physics.world.setBounds(0, 0, GCwidth, GCheight);
-        this.cameras.main.setBounds(0, 0, GCwidth, GCheight);
+    // 1. Expand the Game World dynamically
+    const { width: worldWidth, height: worldHeight } = GAME_CONFIG.worlds.hub; 
     
     // Tell the physics engine the new boundaries
     this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
+    
+    this.physics.world.gravity.y = 0;
 
     // Optional: Add a large floor background here (Scroll factor defaults to 1)
     // this.add.tileSprite(0, 0, worldWidth, worldHeight, 'floor').setOrigin(0, 0);
