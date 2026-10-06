@@ -24,7 +24,8 @@ const config = {
   physics: { 
     default: 'arcade', 
     arcade: {
-      debug: false // Turn this to false when you publish
+      gravity: { y: 0 },
+      debug: false // Change to true to see hitboxes
     }
   },
   scene: [HubScene, GalleryScene] // HubScene loads first
