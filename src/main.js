@@ -1,11 +1,12 @@
 import Phaser from 'phaser';
 import { HubScene } from './HubScene';
 import { GalleryScene } from './GalleryScene';
+import { GAME_CONFIG } from './constants'; 
 
 const config = {
   type: Phaser.AUTO,
-  width: 800,
-  height: 600,
+  width: GAME_CONFIG.width,
+  height: GAME_CONFIG.height,
   parent: 'game-container', // Matches the div ID in index.html
   backgroundColor: '#ffffff',
 
@@ -13,15 +14,17 @@ const config = {
   scale: {
     // FIT maintains aspect ratio and scales the canvas to fit the window
     mode: Phaser.Scale.FIT, 
+
     // Centers the game canvas both horizontally and vertically
     autoCenter: Phaser.Scale.CENTER_BOTH, 
+
     // Your base game resolution (Phaser scales this up or down)
-    width: 800,  
-    height: 600
+    width: GAME_CONFIG.width,  
+    height: GAME_CONFIG.height
   },
 
-  physics: {
-    default: 'arcade',
+  physics: { 
+    default: 'arcade', 
     arcade: {
       debug: false // Turn this to false when you publish
     }

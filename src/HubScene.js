@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { GAME_CONFIG } from './constants';
 
 export class HubScene extends Phaser.Scene {
   constructor() {
@@ -24,10 +25,12 @@ export class HubScene extends Phaser.Scene {
   create() {
     this.physics.world.gravity.y = 0;
 
-    // 1. Expand the Game World
-    // The canvas is 800x600, but the world is now 2000x2000
-    const worldWidth = 900;
-    const worldHeight = 900;
+ // 1. Expand the Game World dynamically
+        const { GCwidth, GCheight } = GAME_CONFIG.worlds.hub; 
+        
+        // Example of applying it to the physics world bounds:
+        this.physics.world.setBounds(0, 0, GCwidth, GCheight);
+        this.cameras.main.setBounds(0, 0, GCwidth, GCheight);
     
     // Tell the physics engine the new boundaries
     this.physics.world.setBounds(0, 0, worldWidth, worldHeight);

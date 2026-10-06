@@ -1,18 +1,18 @@
-/* Reset margins and prevent scrolling */
+/* Reset body to take up the exact screen size */
 html, body {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden; 
-  background-color: #000000; /* Fills empty space with black if aspect ratios differ */
+  overflow: hidden;         /* Completely disables browser scrolling */
+  background-color: #111;   /* Dark background for the "letterbox" empty space */
 }
 
-/* Ensure the container takes up the full screen */
+/* Force the container to match the viewport size */
 #game-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
+  width: 100vw;
+  height: 100vh;
+  display: flex;            /* Flexbox ensures absolute center alignment */
   justify-content: center;
   align-items: center;
 }
