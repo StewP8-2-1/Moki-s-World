@@ -1,11 +1,14 @@
 import Phaser from 'phaser';
-import { GAME_CONFIG } from './constants';
-import { PlatformerController } from './GameControllers';
+import { GAME_CONFIG } from '../constants';
+import { PlatformerController } from '../GameControllers';
+import { ArtworksData } from '../ArtworkData'; // Import the new module
+import { DialogueUI } from '../DialogueUI'; // Import the new UI module
 
-export class GalleryScene extends Phaser.Scene {
+export class ArtworkScene extends Phaser.Scene {
     
   constructor() {
-    super('GalleryScene');
+    super('ArtworkScene');
+    this.isDialogueLocked = false; // Tracks if the dialogue box is pinned by a click
   }
 
   preload() {
@@ -14,29 +17,21 @@ export class GalleryScene extends Phaser.Scene {
       frameHeight: 512
     });
 
-    // Load the gallery artwork
-    this.load.image('art-news', 'news of the world.jpg');
-    this.load.image('art-say', 'say i am you.jpg');
-    this.load.image('art-blue', 'Thank you blue.jpg');
-
-    
+    // 1. Dynamically Load the gallery artwork from our module
+    ArtworksData.forEach(art => {
+      this.load.image(art.key, art.imagePath);
+    });
   }
 
   create() {
-
-    // 1. Expand the Game World dynamically
     const { width: worldWidth, height: worldHeight } = GAME_CONFIG.worlds.gallery; 
     
-    // Tell the physics engine the new boundaries
     this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
-    
-    // Side-scroll physics (gravity enabled)
     this.physics.world.gravity.y = 600;
 
     // ==========================================
     // PARALLAX BACKGROUND LAYERS
     // ==========================================
-    // Layer 1: Deep Background (Moves very slowly: 20% speed)
     this.add.rectangle(0, 0, worldWidth * 1.5, worldHeight, 0xffffff)
         .setOrigin(0, 0)
         .setDepth(-5)
@@ -72,22 +67,63 @@ export class GalleryScene extends Phaser.Scene {
     this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
 
     // ==========================================
-    // ADD GALLERY ARTWORK (BACKGROUND)
+    // INITIALIZE EXTERNAL DIALOGUE UI
     // ==========================================
-    const artSize = 160; 
-    const heightOnWall = 350; 
+    // You can now easily change the dialogue box parameters here without breaking text alignment
+    this.dialogueUI = new DialogueUI(this, { 
+      width: this.cameras.main.width, 
+      height: 140, 
+      paddingTop: 20, 
+      titleSpacing: 0
+    });
 
-    this.add.image(250, heightOnWall, 'art-news').setDisplaySize(artSize, artSize).setDepth(-1);
-    this.add.image(450, heightOnWall, 'art-say').setDisplaySize(artSize, artSize).setDepth(-1);
-    this.add.image(650, heightOnWall, 'art-blue').setDisplaySize(artSize, artSize).setDepth(-1);
+    // ==========================================
+    // ADD GALLERY ARTWORK & INTERACTION
+    // ==========================================
+    ArtworksData.forEach(art => {
+      const artImage = this.add.image(art.x, art.y, art.key)
+          .setDisplaySize(art.size, art.size)
+          .setDepth(-1)
+          .setInteractive({ useHandCursor: true }); 
+
+      // Hover In
+      artImage.on('pointerover' , () => {
+        if (!this.isDialogueLocked) {
+          // Pass the data and the calculated X/Y coordinates to place it above the artwork
+          this.dialogueUI.show(art, this.cameras.main.width / 2, artImage.y - (art.size / 2) - 15);
+        }
+      });
+
+      // Hover Out
+      artImage.on('pointerout', () => {
+        if (!this.isDialogueLocked) {
+          this.dialogueUI.hide();
+        }
+      });
+
+      // Click to lock
+      artImage.on('pointerdown', (pointer, localX, localY, event) => {
+        event.stopPropagation(); 
+        this.isDialogueLocked = true;
+        const targetY = artImage.y - (art.size / 2) - 15;
+        this.dialogueUI.show(art, this.cameras.main.width / 2, artImage.y - (art.size / 2) - 15);
+
+      });
+
+    });
+
+    // Global click listener to close the dialogue box
+    this.input.on('pointerdown', () => {
+      if (this.isDialogueLocked) {
+        this.isDialogueLocked = false;
+        this.dialogueUI.hide();
+      }
+    });
 
     // ==========================================
     // INITIALIZE PLATFORMER CONTROLS HERE
-    // Pass 'this' (the scene), the player sprite, speed (200), and jump power (400)
     // ==========================================
     this.controls = new PlatformerController(this, this.player, 200, 400);
-
-    // 2. Generate the settings menu automatically
     this.controls.createBurgerMenu();
 
     // ==========================================
@@ -101,18 +137,16 @@ export class GalleryScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     this.physics.add.overlap(this.player, this.hubPortal, this.returnToHub, null, this);
-
   }
 
   update() {
-    const speed = 200;
-    const jumpPower = 400;
     this.player.setVelocityX(0); 
-
     this.controls.update();
   }
 
   returnToHub() {
     this.scene.start('HubScene');
   }
+
+
 }

@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
-import { GAME_CONFIG } from './constants';
-import { TopDownController } from './GameControllers';
+import { GAME_CONFIG } from '../constants';
+import { TopDownController } from '../GameControllers';
   
 export class HubScene extends Phaser.Scene {
   constructor() {
@@ -86,7 +86,7 @@ export class HubScene extends Phaser.Scene {
     //  INTERACTABLE LINKS OBJECT
     // ==========================================
     // Place it physically above the player spawn (e.g., y = 200)
-    this.facebookBtn = this.add.sprite(400, 180, 'facebookIcon');
+    this.facebookBtn = this.add.sprite(400, 180, 'facebookIcon',);
     
     // Optional: Scale it down if the raw image is too large
     this.facebookBtn.setScale(0.5); 
@@ -172,7 +172,14 @@ export class HubScene extends Phaser.Scene {
       fontStyle: 'bold'
     }).setOrigin(0.5); // .setOrigin(0.5) centers the text perfectly over the coordinates
 
-    this.merchPortal = this.physics.add.sprite(200, 800, 'portal'); // Straight down
+    this.artworkPortal = this.physics.add.sprite(200, 800, 'portal'); // Straight down
+
+    this.add.text(200, 760, 'Artwork Showcase', { 
+      fontSize: '24px', 
+      fill: '#000000', // black text
+      fontFamily: 'Arial',
+      fontStyle: 'bold'
+    }).setOrigin(0.5); // .setOrigin(0.5) centers the text perfectly over the coordinates
 
     // 4. Setup the Camera
     // Restrict the camera so it doesn't show the black void outside the world limits
@@ -183,7 +190,7 @@ export class HubScene extends Phaser.Scene {
     this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
     
     this.physics.add.overlap(this.player, this.makiPortal, this.enterGallery, null, this);
-    this.physics.add.overlap(this.player, this.merchPortal, this.enterMerch, null, this);
+    this.physics.add.overlap(this.player, this.artworkPortal, this.enterArtwork, null, this);
     
   }
 
@@ -200,7 +207,7 @@ export class HubScene extends Phaser.Scene {
     this.scene.start('GalleryScene');
   }
 
-  enterMerch() {
-    // this.scene.start('MerchScene');
+  enterArtwork() {
+    this.scene.start('ArtworkScene');
   }
 }
