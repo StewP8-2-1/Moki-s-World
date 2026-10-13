@@ -21,6 +21,7 @@ export class ArtworkScene extends Phaser.Scene {
     ArtworksData.forEach(art => {
       this.load.image(art.key, art.imagePath);
     });
+    
   }
 
   create() {
@@ -46,7 +47,7 @@ export class ArtworkScene extends Phaser.Scene {
     // ==========================================
     // PLAYER SETUP
     // ==========================================
-    this.player = this.physics.add.sprite(100, 538, 'player-side');
+    this.player = this.physics.add.sprite(175, 538, 'player-side');
     this.player.setScale(0.25); 
     this.player.setSize(200, 190);
     this.physics.add.existing(this.player, false);
@@ -74,17 +75,23 @@ export class ArtworkScene extends Phaser.Scene {
       width: this.cameras.main.width, 
       height: 140, 
       paddingTop: 20, 
-      titleSpacing: 0
+      titleSpacing: 0,
+      bottomMargin: 140 // Space from the bottom edge of the screen
     });
 
     // ==========================================
     // ADD GALLERY ARTWORK & INTERACTION
     // ==========================================
     ArtworksData.forEach(art => {
-      const artImage = this.add.image(art.x, art.y, art.key)
-          .setDisplaySize(art.size, art.size)
+      const artImage = this.add.image(art.x, art.y, art.key);
+
+       // 1. Calculate the scale factor based on the largest side of the original image
+      const scale = art.size / Math.max(artImage.width, artImage.height);
+      
+      // 2. Use setScale() instead of setDisplaySize()
+      artImage.setScale(scale)
           .setDepth(-1)
-          .setInteractive({ useHandCursor: true }); 
+          .setInteractive({ useHandCursor: true });
 
       // Hover In
       artImage.on('pointerover' , () => {
@@ -124,15 +131,26 @@ export class ArtworkScene extends Phaser.Scene {
     // INITIALIZE PLATFORMER CONTROLS HERE
     // ==========================================
     this.controls = new PlatformerController(this, this.player, 200, 400);
+
+     // 3. Register the Dialogue container to sync with Zoom!
+    this.controls.registerDialogueBox(this.dialogueUI.container);
+    
     this.controls.createBurgerMenu();
 
     // ==========================================
     // PORTAL SETUP
     // ==========================================
-    this.hubPortal = this.physics.add.staticSprite(40, 520, 'portal');
+    this.hubPortal = this.physics.add.staticSprite(75, 500, 'portal').setScale(0.5); // Far left and down
     this.hubPortal.setDepth(0);
 
-    this.add.text(80, 480, 'Return to Moki\'s Hub', { 
+    // 1. ADJUST THE HITBOX SIZE AND POSITION
+    // setSize(width, height) defines the actual pixel dimensions of the overlap area
+    this.hubPortal.setSize(100, 100); 
+    
+    // setOffset(x, y) shifts the hitbox relative to the top-left of the unscaled texture
+    this.hubPortal.setOffset(50, 50);
+
+    this.add.text(80, 450, 'Return to Moki\'s Hub', { 
       fontSize: '16px', fill: '#000000', fontFamily: 'Arial', fontStyle: 'bold'
     }).setOrigin(0.5);
 

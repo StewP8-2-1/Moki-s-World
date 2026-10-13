@@ -23,6 +23,7 @@ export class HubScene extends Phaser.Scene {
     this.load.image('facebookIcon', 'Facebook.png');
     this.load.image('twitterIcon', 'Twitter.png');
     this.load.image('IGIcon', 'IG.png');
+    this.load.image('portal', 'Portal-Paint.png');
     
     // this.load.image('portal', 'path/to/portal.png');
     // this.load.image('clouds', 'path/to/clouds.png');
@@ -47,6 +48,8 @@ export class HubScene extends Phaser.Scene {
     
     // 2. Scale the player down to about 15% so it fits the screen properly
     this.player.setScale(0.25); 
+    this.player.setSize(180, 200); // Adjust the hitbox size to match the scaled sprite
+    this.player.setOffset(150, 150); // Adjust the hitbox offset to align with the sprite
     this.player.setCollideWorldBounds(true);
 
     // 3. Create an animation using the frames
@@ -152,29 +155,22 @@ export class HubScene extends Phaser.Scene {
       fontStyle: 'bold'
     }).setOrigin(0.5);
 
-
-
-
-
-
     // ==========================================
-
-
 
     // 3. Place Portals Off-Screen
     // Placing these far beyond the 800x600 starting view forces the player to explore
-    this.makiPortal = this.physics.add.sprite(700, 400, 'portal'); // Far right and down
+    this.makiPortal = this.physics.add.sprite(700, 400, 'portal').setScale(0.5); // Far right and down
     // Label above the Maki portal
-    this.add.text(700, 360, 'Cover Art Gallery', { 
+    this.add.text(700, 340, 'Requested Art Gallery', { 
       fontSize: '24px', 
       fill: '#000000', // White text
       fontFamily: 'Arial',
       fontStyle: 'bold'
     }).setOrigin(0.5); // .setOrigin(0.5) centers the text perfectly over the coordinates
 
-    this.artworkPortal = this.physics.add.sprite(200, 800, 'portal'); // Straight down
+    this.artworkPortal = this.physics.add.sprite(200, 800, 'portal').setScale(0.5); // Straight down
 
-    this.add.text(200, 760, 'Artwork Showcase', { 
+    this.add.text(200, 740, 'Artwork Showcase', { 
       fontSize: '24px', 
       fill: '#000000', // black text
       fontFamily: 'Arial',

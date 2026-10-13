@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { GAME_CONFIG } from '../constants';
 import { PlatformerController } from '../GameControllers';
+import { ReqworksData } from '../ReqworkData'; // Import the new module
+import { DialogueUI } from '../DialogueUI';
 
 export class GalleryScene extends Phaser.Scene {
     
@@ -14,11 +16,10 @@ export class GalleryScene extends Phaser.Scene {
       frameHeight: 512
     });
 
-    // Load the gallery artwork
-    this.load.image('art-news', 'news of the world.jpg');
-    this.load.image('art-say', 'say i am you.jpg');
-    this.load.image('art-blue', 'Thank you blue.jpg');
-
+     // 1. Dynamically Load the gallery artwork from our module
+       ReqworksData.forEach(art => {
+         this.load.image(art.key, art.imagePath);
+       });
     
   }
 
@@ -51,7 +52,7 @@ export class GalleryScene extends Phaser.Scene {
     // ==========================================
     // PLAYER SETUP
     // ==========================================
-    this.player = this.physics.add.sprite(100, 538, 'player-side');
+    this.player = this.physics.add.sprite(170, 538, 'player-side');
     this.player.setScale(0.25); 
     this.player.setSize(200, 190);
     this.physics.add.existing(this.player, false);
@@ -71,15 +72,58 @@ export class GalleryScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, worldWidth, worldHeight);
     this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
 
-    // ==========================================
-    // ADD GALLERY ARTWORK (BACKGROUND)
-    // ==========================================
-    const artSize = 160; 
-    const heightOnWall = 350; 
+        // ==========================================
+        // INITIALIZE EXTERNAL DIALOGUE UI
+        // ==========================================
+        this.dialogueUI = new DialogueUI(this, { 
+          // Let's subtract 40 from width so it doesn't touch the very edges of the screen
+          width: this.cameras.main.width + 10, 
+          height: 140, 
+          paddingTop: 20, 
+          titleSpacing: 0,
+          bottomMargin: 140 // Space from the bottom edge of the screen
+        });
 
-    this.add.image(250, heightOnWall, 'art-news').setDisplaySize(artSize, artSize).setDepth(-1);
-    this.add.image(450, heightOnWall, 'art-say').setDisplaySize(artSize, artSize).setDepth(-1);
-    this.add.image(650, heightOnWall, 'art-blue').setDisplaySize(artSize, artSize).setDepth(-1);
+        // ==========================================
+        // ADD GALLERY ARTWORK & INTERACTION
+        // ==========================================
+        ReqworksData.forEach(art => {
+          const artImage = this.add.image(art.x, art.y, art.key);
+          const scale = art.size / Math.max(artImage.width, artImage.height);
+          
+          artImage.setScale(scale)
+              .setDepth(-1)
+              .setInteractive({ useHandCursor: true });
+
+          // Hover In
+          artImage.on('pointerover' , () => {
+            if (!this.isDialogueLocked) {
+              this.dialogueUI.show(art); // UPDATED: Pass data only
+            }
+          });
+
+          // Hover Out
+          artImage.on('pointerout', () => {
+            if (!this.isDialogueLocked) {
+              this.dialogueUI.hide();
+            }
+          });
+
+          // Click to lock
+          artImage.on('pointerdown', (pointer, localX, localY, event) => {
+            event.stopPropagation(); 
+            this.isDialogueLocked = true;
+            this.dialogueUI.show(art); // UPDATED: Pass data only
+          });
+        });
+
+        // Global click listener to close the dialogue box
+        this.input.on('pointerdown', () => {
+          if (this.isDialogueLocked) {
+            this.isDialogueLocked = false;
+            this.dialogueUI.hide();
+          }
+        });
 
     // ==========================================
     // INITIALIZE PLATFORMER CONTROLS HERE
@@ -87,20 +131,30 @@ export class GalleryScene extends Phaser.Scene {
     // ==========================================
     this.controls = new PlatformerController(this, this.player, 200, 400);
 
+    // 3. Register the Dialogue container to sync with Zoom!
+    this.controls.registerDialogueBox(this.dialogueUI.container);
+
     // 2. Generate the settings menu automatically
     this.controls.createBurgerMenu();
 
     // ==========================================
     // PORTAL SETUP
     // ==========================================
-    this.hubPortal = this.physics.add.staticSprite(40, 520, 'portal');
+    this.hubPortal = this.physics.add.staticSprite(75, 500, 'portal').setScale(0.5); // Far left and down
     this.hubPortal.setDepth(0);
 
-    this.add.text(80, 480, 'Return to Moki\'s Hub', { 
+    // 1. ADJUST THE HITBOX SIZE AND POSITION
+    // setSize(width, height) defines the actual pixel dimensions of the overlap area
+    this.hubPortal.setSize(100, 100); 
+    
+    // setOffset(x, y) shifts the hitbox relative to the top-left of the unscaled texture
+    this.hubPortal.setOffset(50, 50);
+
+    this.add.text(80, 450, 'Return to Moki\'s Hub', { 
       fontSize: '16px', fill: '#000000', fontFamily: 'Arial', fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    this.physics.add.overlap(this.player, this.hubPortal, this.returnToHub, null, this);
+    this.physics.add.overlap(this.player, this.hubPortal, this.returnToHub, null, this); // Adjust the size of the overlap area
 
   }
 
@@ -110,6 +164,7 @@ export class GalleryScene extends Phaser.Scene {
     this.player.setVelocityX(0); 
 
     this.controls.update();
+
   }
 
   returnToHub() {
