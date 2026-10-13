@@ -60,7 +60,7 @@ class BaseController {
   setupCameraControls() {
     const cam = this.scene.cameras.main;
     const minZoom = 1.0; 
-    const maxZoom = 1.5; 
+    const maxZoom = 2.0; 
     const zoomSpeedWheel = 0.001; 
     const zoomSpeedPinch = 0.005; 
 
