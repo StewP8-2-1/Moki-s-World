@@ -7,6 +7,6 @@ export const GAME_CONFIG = {
     // The expanded world bounds for your specific scenes
     worlds: {
         hub: { width: 900, height: 900 },
-        gallery: { width: 2400, height: 900 }
+        gallery: { width: 3600, height: 900 }
     }
 };

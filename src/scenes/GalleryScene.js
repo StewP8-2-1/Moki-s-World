@@ -84,46 +84,60 @@ export class GalleryScene extends Phaser.Scene {
           bottomMargin: 140 // Space from the bottom edge of the screen
         });
 
-        // ==========================================
-        // ADD GALLERY ARTWORK & INTERACTION
-        // ==========================================
-        ReqworksData.forEach(art => {
-          const artImage = this.add.image(art.x, art.y, art.key);
-          const scale = art.size / Math.max(artImage.width, artImage.height);
-          
-          artImage.setScale(scale)
-              .setDepth(-1)
-              .setInteractive({ useHandCursor: true });
+       // ==========================================
+    // ADD GALLERY ARTWORK & INTERACTION
+    // ==========================================
+    ReqworksData.forEach(art => {
+      const artImage = this.add.image(art.x, art.y, art.key);
+      const scale = art.size / Math.max(artImage.width, artImage.height);
+      
+      artImage.setScale(scale)
+          .setDepth(-1)
+          .setInteractive({ useHandCursor: true });
 
-          // Hover In
-          artImage.on('pointerover' , () => {
-            if (!this.isDialogueLocked) {
-              this.dialogueUI.show(art); // UPDATED: Pass data only
-            }
-          });
+      // Hover In
+      artImage.on('pointerover' , () => {
+        if (!this.isDialogueLocked) {
+          this.dialogueUI.show(art); 
+        }
+      });
 
-          // Hover Out
-          artImage.on('pointerout', () => {
-            if (!this.isDialogueLocked) {
-              this.dialogueUI.hide();
-            }
-          });
+      // Hover Out
+      artImage.on('pointerout', () => {
+        if (!this.isDialogueLocked) {
+          this.dialogueUI.hide();
+        }
+      });
 
-          // Click to lock
-          artImage.on('pointerdown', (pointer, localX, localY, event) => {
-            event.stopPropagation(); 
-            this.isDialogueLocked = true;
-            this.dialogueUI.show(art); // UPDATED: Pass data only
-          });
-        });
+      // Click to lock and pan camera
+      artImage.on('pointerdown', (pointer, localX, localY, event) => {
+        event.stopPropagation(); 
+        this.isDialogueLocked = true;
+        this.dialogueUI.show(art); 
+        
+        // 1. Stop following the player
+        this.cameras.main.stopFollow();
+        
+        // 2. Pan to the artwork (x, y, duration in ms, easing function)
+        this.cameras.main.pan(artImage.x, artImage.y + 70, 500, 'Power2');
+      });
+    });
 
-        // Global click listener to close the dialogue box
-        this.input.on('pointerdown', () => {
-          if (this.isDialogueLocked) {
-            this.isDialogueLocked = false;
-            this.dialogueUI.hide();
+    // Global click listener to close the dialogue box and return camera
+    this.input.on('pointerdown', () => {
+      if (this.isDialogueLocked) {
+        this.isDialogueLocked = false;
+        this.dialogueUI.hide();
+
+        // 1. Pan back to the player
+        this.cameras.main.pan(this.player.x, this.player.y, 1000, 'Power2', false, (camera, progress) => {
+          // 2. Once the pan is 100% complete, resume following the player
+          if (progress === 1) {
+            camera.startFollow(this.player, true, 0.1, 0.1);
           }
         });
+      }
+    });
 
     // ==========================================
     // INITIALIZE PLATFORMER CONTROLS HERE

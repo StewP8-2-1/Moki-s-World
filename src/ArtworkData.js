@@ -1,6 +1,7 @@
 // ArtworkData.js
 
 export const ArtworksData = [
+
   {
     key: 'Out in The Field  Grass',
     imagePath: 'Out in The Field Grass.jpg',
@@ -10,4 +11,5 @@ export const ArtworksData = [
     y: 350,
     size: 300
   }
+  
 ];

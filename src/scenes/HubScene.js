@@ -89,10 +89,10 @@ export class HubScene extends Phaser.Scene {
     //  INTERACTABLE LINKS OBJECT
     // ==========================================
     // Place it physically above the player spawn (e.g., y = 200)
-    this.facebookBtn = this.add.sprite(400, 180, 'facebookIcon',);
+    this.facebookBtn = this.add.image(400, 180, 'facebookIcon');
     
     // Optional: Scale it down if the raw image is too large
-    this.facebookBtn.setScale(0.5); 
+    this.facebookBtn.setScale(0.5).setDepth(-1); 
     
     // Make it clickable/touchable with a hand cursor on hover
     this.facebookBtn.setInteractive({ useHandCursor: true });
@@ -111,10 +111,10 @@ export class HubScene extends Phaser.Scene {
       fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    this.twtBtn = this.add.sprite(200, 180, 'twitterIcon');
+    this.twtBtn = this.add.image(200, 180, 'twitterIcon');
     
     // Optional: Scale it down if the raw image is too large
-    this.twtBtn.setScale(0.5); 
+    this.twtBtn.setScale(0.5).setDepth(-1); 
     
     // Make it clickable/touchable with a hand cursor on hover
     this.twtBtn.setInteractive({ useHandCursor: true });
@@ -132,11 +132,11 @@ export class HubScene extends Phaser.Scene {
       fontFamily: 'Arial',
       fontStyle: 'bold'
     }).setOrigin(0.5);
-
-    this.igBtn = this.add.sprite(600, 180, 'IGIcon');
+    
+    this.igBtn = this.add.image(600, 180, 'IGIcon');
     
     // Optional: Scale it down if the raw image is too large
-    this.igBtn.setScale(0.5); 
+    this.igBtn.setScale(0.5).setDepth(-1); 
     
     // Make it clickable/touchable with a hand cursor on hover
     this.igBtn.setInteractive({ useHandCursor: true });
