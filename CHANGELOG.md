@@ -5,7 +5,34 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+- Keyboard, gamepad and touch players can now use paintings, promos and links without a mouse. Walk up to one and a prompt appears above Moki ("E · View", "A · Open", "ACT · View"). Press E, Enter or Space (top-down), gamepad A (top-down) or X, or the on-screen **ACT** button, which appears only when something is in range. Pressing interact again on an open promo follows its button, and on a painting it closes the dialogue. The CTA shows the key to press.
+- If the browser blocks a link opened from a gamepad, the link appears in the dialogue with a button to click or tap instead.
+- Clicking or tapping the painting that is already open closes its dialogue. Hover previews are mouse-only, so a tap on a touch screen no longer flashes a preview.
+- Gamepad support: left stick (with a deadzone) or d-pad to move, A to jump in galleries, B to close the dialogue.
+- Esc closes the dialogue.
+
+### Fixed
+- The dialogue box's call-to-action button could be clicked only near its original position. Once the camera scrolled, its hit area drifted away from where it was drawn (Phaser containers don't pass their scroll factor to their children).
+- Every portal trip added two more input pointers to the game (`addPointer(2)` ran in each scene restart). The pointer count is now set once in the game config.
+- The dialogue box was badly framed. It was wider than the screen (the border was clipped on both sides), had a fixed height so long text overflowed under the button, and covered the touch D-pad. It is now inset evenly, sized to its content (up to 45% of the screen, with "…" for longer text), and sits between the touch buttons when they are shown.
+- After clicking a painting, the camera stayed on it when you walked away. The controller still believed it was following the player, so it never restarted the follow. The camera now has a single owner (`CameraDirector`) and walking always brings it back.
+- A locked dialogue stayed open while the player walked away. Moving now closes it.
+- Moving diagonally in the hub was about 41% faster than moving straight.
+- Any click on empty space while zoomed in detached the camera from the player. Panning now starts only after an 8 px drag, and a pinch is never treated as a tap.
+- `DialogueUI` options set to `0` were silently replaced by their defaults (`||` instead of `??`).
+- Clicking the dialogue box itself closed it. It now only closes with ✕ (a new 44 px button) or a tap on empty space.
+- Clicking a painting now frames it in the visible part of the screen above the dialogue box, instead of using a fixed 70 px offset. Hover previews switch to the top of the screen when the object would be hidden under the box.
+
+### Removed
+- The unused `#ui-layer` HTML overlay in `index.html` and its CSS.
+
 ### Changed
+- The dialogue box, touch buttons and ☰ menu moved into a new screen-space `HudScene` that runs above `WorldScene`. Zooming the world no longer needs counter-zoom maths on the UI, and taps on HUD buttons never reach the world.
+- The CTA ("Learn more") is now a real button with hover and pressed states, a 44 px touch target, and a "Tap to open" fallback when the browser blocks the popup.
+- Touch buttons are multitouch-safe and are released when the tab loses focus.
+- Keyboard, gamepad and touch input are merged into one `InputState` (`moveX`/`moveY`, `jump`, `interactPressed`, `cancelPressed`), so every input type drives the player the same way in both world modes.
+- Touch controls default to on only for touch devices. Until you pick a setting in the ☰ menu, they hide after keyboard or gamepad use and come back after a touch. The menu choice is remembered across visits. The ☰ menu closes when you tap outside it.
 - v1.0.0 is live in production at https://moki-s-world.vercel.app. PR #1 was merged and production was verified as a public visitor (19/19 browser checks).
 - GitHub Pages was switched off for the repo, so the old `github.io` address is retired.
 

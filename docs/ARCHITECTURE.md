@@ -53,15 +53,36 @@ The game and the editor both call `create()`, so what you see in the editor is w
 - `WorldScene({ sceneId })` builds one scene from the data. Its `mode` picks the controller from `src/GameControllers.js`:
   - `topdown` → `TopDownController`
   - `platformer` → `PlatformerController`
+- `WorldScene` launches `HudScene` on top of itself, and launches it again on every scene change. The HUD holds the screen-space UI: the dialogue box (`src/DialogueUI.js`), the touch buttons and the ☰ menu. Its camera never scrolls or zooms, and Phaser's `globalTopOnly` input means a tap on a HUD button never reaches the world. World code talks to the HUD through `WorldScene.showDialogue(data, { placement })`, `hideDialogue()` and `closeDialogue()`.
+- `DialogueUI` sizes itself to its content (up to 45% of the screen height), sits at the bottom or the top (`placement`), keeps clear of the touch buttons through `setSafeArea()`, and reports `getCoverage()` so the camera can frame the object in the part of the screen that is still visible.
+
+### Input and camera
+`src/GameControllers.js` has three parts. `WorldScene.update()` drives them once per frame:
+- `InputState` merges the keyboard, the first connected gamepad and the HUD's touch buttons into actions: `moveX`/`moveY` (−1..1), `jump`, `interactPressed` and `cancelPressed`. It also tracks the last input `source` and emits `'source'` when it changes. The HUD uses that to show or hide the touch controls.
+- `CameraDirector` is the **only** code that may call `startFollow`, `stopFollow` or `pan` on the main camera. It has three modes: `follow` (tracking the player), `focus` (panned to an object; see `focusOn(x, y, coverage)`) and `free` (the player dragged the view). It also handles wheel and pinch zoom (1–2×), drag-to-pan after an 8 px threshold when zoomed in, and an `onTap` callback for taps on empty space.
+- `TopDownController` / `PlatformerController` only turn `InputState` into velocity and animation.
+
+Any movement input closes a locked dialogue and returns the camera to `follow`.
+
+**Object interaction.** Behaviours in `src/world/behaviors.js` register each painting, promo and link with `scene.addInteractable({ target, verb, activate })`. Every frame, `WorldScene.updateInteractFocus()` picks the interactable whose bounds are nearest the player's body, within 100 px. It shows a prompt above the player and, through `HudScene.update()`, the contextual ACT button. `interact()` activates that object; if a dialogue is already open, it follows the CTA when there is one and otherwise closes the dialogue. Clicking or tapping an object runs the same `activate` path, so every input type behaves the same. Portals stay overlap-based.
+
+| Action | Keyboard | Gamepad | Touch / mouse |
+|---|---|---|---|
+| Move | WASD / arrows | Left stick / d-pad | On-screen buttons |
+| Jump (galleries) | Space, W, ↑ | A | JUMP |
+| Interact (view / open / CTA) | E, Enter, Space (top-down) | X, or A (top-down) | ACT (when in range), or click / tap the object |
+| Close dialogue | Esc | B | ✕, or tap empty space |
+| Zoom | — | — | Mouse wheel / pinch |
+| Pan when zoomed | — | — | Drag |
 
 ## File map
 | Path | Role |
 |---|---|
 | `src/main.js` | Phaser game config |
-| `src/GameControllers.js` | Player controllers, zoom/pan, D-pad, menu |
-| `src/DialogueUI.js` | Bottom dialogue box |
+| `src/GameControllers.js` | `InputState` (keyboard/gamepad/touch), `CameraDirector`, movement controllers |
+| `src/DialogueUI.js` | Dialogue box (rendered in the HUD) |
 | `src/world/` | Object registry, behaviours, world loader |
-| `src/scenes/` | Boot + World scenes |
+| `src/scenes/` | Boot, World and HUD scenes |
 | `src/admin/` | Admin editor |
 | `api/world.js`, `api/admin.js` | The only two Vercel Functions. `admin.js` routes every `/api/admin/*` request |
 | `api/_admin/`, `api/_lib/` | Admin handlers and shared helpers (not deployed as functions) |

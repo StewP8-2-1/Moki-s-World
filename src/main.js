@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene';
 import { WorldScene } from './scenes/WorldScene';
+import { HudScene } from './scenes/HudScene';
 import { GAME_CONFIG } from './constants';
 
 const config = {
@@ -19,13 +20,19 @@ const config = {
   // Relative asset paths (legacy files in /public) resolve against the deploy base
   loader: { baseURL: import.meta.env.BASE_URL },
 
+  // Mouse + 3 touch pointers (pinch-zoom while holding a button). Set once here: calling
+  // input.addPointer() from a scene added more pointers on every scene restart.
+  // Gamepads are read by InputState (src/GameControllers.js).
+  input: { activePointers: 3, gamepad: true },
+
   physics: {
     default: 'arcade',
     arcade: { gravity: { y: 0 }, debug: false },
   },
 
-  // Boot loads the world (API or bundled fallback), then starts the data-driven World scene
-  scene: [BootScene, WorldScene],
+  // Boot loads the world (API or bundled fallback), then starts the data-driven World scene,
+  // which launches the screen-space HUD on top of itself
+  scene: [BootScene, WorldScene, HudScene],
 };
 
 const game = new Phaser.Game(config);
