@@ -5,7 +5,7 @@
 ## Public
 | Method | Path | Description |
 |---|---|---|
-| GET | `/api/world` | Latest published world snapshot. Cached at the CDN (`s-maxage=60, stale-while-revalidate`). `?draft=1` with a valid admin cookie returns the live draft instead. |
+| GET | `/api/world` ✅ | Latest published world snapshot (format in `docs/DATABASE.md`). Cached at the CDN (`s-maxage=60, stale-while-revalidate=600`). Returns `404` if nothing is published and `503` if the DB isn't configured. _Phase 5:_ `?draft=1` with a valid admin cookie will return the live draft instead. |
 
 ## Admin (requires the `mw_admin` httpOnly cookie)
 | Method | Path | Description |

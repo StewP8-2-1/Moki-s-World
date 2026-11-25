@@ -10,6 +10,8 @@
    - `ADMIN_PASSWORD`: the editor password
    - `AUTH_SECRET`: 32+ random characters, used to sign the admin cookie (`openssl rand -hex 32`)
 5. Seed once: `npx vercel env pull .env.local`, then run `npm run db:seed`.
+   - `npm run db:seed -- --dry-run` validates the data and regenerates `src/data/fallbackWorld.json` without a database.
+   - `npm run db:seed -- --force` wipes the draft tables and reseeds them. Earlier published versions are kept.
 
 ## Local development
 ```

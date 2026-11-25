@@ -15,8 +15,8 @@ export function handle(fn) {
       return await fn(request);
     } catch (err) {
       const status = err.status || 500;
-      if (status >= 500) console.error(err);
-      return error(status, status >= 500 && !err.status ? 'Internal server error' : err.message);
+      if (!err.status) console.error(err); // unexpected errors only
+      return error(status, err.status ? err.message : 'Internal server error');
     }
   };
 }
