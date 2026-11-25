@@ -20,7 +20,9 @@
 | Neon database | Vercel marketplace integration, resource `mokis-world-db`, free plan, region `sin1` (Singapore). Sets `DATABASE_URL` |
 | Blob store | `mokis-world-media`, public access, region `sin1`. Sets `BLOB_READ_WRITE_TOKEN` |
 | `AUTH_SECRET` | Random 32-byte hex, marked sensitive, set for all environments |
-| `ADMIN_PASSWORD` | Set by the owner in the Vercel dashboard (Settings → Environment Variables) |
+| `ADMIN_PASSWORD` | Sensitive, set for all environments. Change it in the Vercel dashboard (Settings → Environment Variables) |
+
+The database was seeded on 2026-11-25 with `npm run db:seed`, which published version 1 (3 scenes, 16 objects).
 
 The local folder is linked with `vercel link`. `vercel env pull .env.local` refreshes the local secrets. `.env*` and `.vercel` are gitignored.
 

@@ -7,7 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Phase checklist
 - [x] Phase 0: Development process and documentation scaffold
-- [ ] Phase 1: Backend foundation (schema, `/api/world`, seed)
+- [x] Phase 1: Backend foundation (schema, `/api/world`, seed). Live Neon DB seeded, version 1 published.
 - [ ] Phase 2: Data-driven game (object registry, WorldScene)
 - [ ] Phase 3: Admin shell (login, read-only scene view)
 - [ ] Phase 4: Visual editing (drag, inspector, palette, undo)
@@ -31,7 +31,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   - It always regenerates `src/data/fallbackWorld.json`.
 - `npm run dev:full` runs `vercel dev`, the full stack locally.
 - Infrastructure (not in code): the repo is linked to the Vercel project `moki-s-world`.
+  - The Neon database `mokis-world-db` is in `sin1` on the free plan. It was added through the Vercel marketplace, which sets `DATABASE_URL` and the `PG*`/`POSTGRES_*` variables.
   - The Blob store `mokis-world-media` is in `sin1`.
+  - `ADMIN_PASSWORD` is set on Vercel as a sensitive variable.
   - `AUTH_SECRET` is set on Vercel.
   - The setup is recorded in `docs/DEPLOYMENT.md`.
 
