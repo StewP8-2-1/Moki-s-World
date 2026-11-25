@@ -12,6 +12,9 @@
     "vite": "^8.3.0"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.2.1",
+    "@vercel/blob": "^2.9.0",
+    "jose": "^6.2.18",
     "phaser": "^4.2.1"
   }
 }

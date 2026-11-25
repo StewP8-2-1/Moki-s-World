@@ -1,6 +1,6 @@
 # Database (Neon Postgres)
 
-> Status: planned. `db/schema.sql` lands in Phase 1 and is the source of truth.
+> Status: ✅ the schema is implemented in `db/schema.sql`, which is the source of truth and safe to re-run. The snapshot builder is `api/lib/world.js`.
 
 ## Tables
 ### `scenes` (draft)
@@ -45,3 +45,22 @@
 | `promo` | `imageUrl, title, body, ctaLabel, ctaUrl, startsAt?, endsAt?` |
 | `text` | `text, fontSize, color` |
 | `decor` | `imageUrl` |
+
+## Snapshot format
+The same format is used by `world_versions.snapshot`, `GET /api/world` and `src/data/fallbackWorld.json`:
+```json
+{
+  "format": 1,
+  "version": 3,
+  "publishedAt": "2026-11-25T10:00:00Z",
+  "startScene": "hub",
+  "scenes": [{
+    "id": "hub", "name": "Moki's Hub", "mode": "topdown",
+    "width": 900, "height": 900, "spawn": { "x": 400, "y": 300 },
+    "background": { "color": "#ffffff" }, "ground": null, "sort": 0,
+    "objects": [{ "id": "…", "type": "link", "x": 400, "y": 180, "size": 100,
+                  "rotation": 0, "depth": -1, "visible": true, "props": { } }]
+  }]
+}
+```
+Objects are sorted by `depth`. `size` is the length of the image's longest side in world pixels. Image URLs are absolute (Blob) or relative to the site root (legacy files in `public/`).
