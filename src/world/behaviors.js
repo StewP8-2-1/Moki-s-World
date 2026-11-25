@@ -1,26 +1,47 @@
 /**
  * Game-only interactions for world objects (the editor never calls these).
- * Ported from the legacy HubScene / GalleryScene / ArtworkScene.
+ *
+ * Every interactive object works the same way with every input type:
+ * - pointer (mouse / touch): click or tap the object
+ * - keyboard / gamepad / touch ACT button: walk up to it; WorldScene picks the nearest registered
+ *   interactable in range, shows a prompt above the player, and calls its `activate()` on interact.
+ * Portals use physics overlap instead, so they already work for every input.
  */
 
+/**
+ * Opens a URL. Returns false when a new tab was blocked by the browser (e.g. the request came
+ * from a gamepad, which isn't a "user gesture"), so callers can offer a clickable fallback.
+ */
 function openUrl(url, newTab = true) {
-  if (!/^https?:\/\//i.test(url || '')) return;
-  if (newTab) window.open(url, '_blank', 'noopener');
-  else window.location.href = url;
+  if (!/^https?:\/\//i.test(url || '')) return true; // nothing valid to open
+  if (!newTab) {
+    window.location.href = url;
+    return true;
+  }
+  const win = window.open(url, '_blank');
+  if (!win) return false;
+  win.opener = null;
+  return true;
 }
 
-/** Hover shows the dialogue; click locks it (and optionally pans the camera to the object). */
+/** Hover previews the dialogue (mouse only); click / interact locks it, and clicking again closes it. */
 function attachDialogue(scene, view, data, { pan }) {
   const target = view.main;
+  const open = () => scene.openDialogue(data, target, { pan });
+
   target.setInteractive({ useHandCursor: true });
-  target.on('pointerover', () => {
-    if (!scene.isDialogueLocked) scene.showDialogue(data, { placement: scene.dialoguePlacementFor(target.x, target.y) });
+  target.on('pointerover', (pointer) => {
+    if (pointer.wasTouch || scene.isDialogueLocked) return;
+    scene.showDialogue(data, { placement: scene.dialoguePlacementFor(target.x, target.y) });
   });
   target.on('pointerout', () => { if (!scene.isDialogueLocked) scene.hideDialogue(); });
   target.on('pointerdown', (pointer, localX, localY, event) => {
     event.stopPropagation();
-    scene.openDialogue(data, target, { pan });
+    if (scene.isDialogueLocked && scene.dialogueTarget === target) scene.closeDialogue();
+    else open();
   });
+
+  scene.addInteractable({ target, verb: 'View', activate: open });
 }
 
 export const BEHAVIORS = {
@@ -39,11 +60,19 @@ export const BEHAVIORS = {
   },
 
   link(scene, view, obj) {
-    view.main.setInteractive({ useHandCursor: true });
-    view.main.on('pointerdown', (pointer, localX, localY, event) => {
+    const target = view.main;
+    const { url, label } = obj.props;
+    const activate = () => {
+      if (openUrl(url, obj.props.openInNewTab !== false)) return;
+      // Popup blocked: show the link in the dialogue with a button the player can click / tap
+      scene.openDialogue({ title: label || 'Link', description: url, ctaLabel: 'Open link', ctaUrl: url }, target, { pan: false });
+    };
+    target.setInteractive({ useHandCursor: true });
+    target.on('pointerdown', (pointer, localX, localY, event) => {
       event.stopPropagation();
-      openUrl(obj.props.url, obj.props.openInNewTab !== false);
+      activate();
     });
+    scene.addInteractable({ target, verb: 'Open', activate });
   },
 
   portal(scene, view, obj) {

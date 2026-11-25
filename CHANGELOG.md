@@ -6,6 +6,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ## [Unreleased]
 
 ### Added
+- Keyboard, gamepad and touch players can now use paintings, promos and links without a mouse. Walk up to one and a prompt appears above Moki ("E · View", "A · Open", "ACT · View"). Press E, Enter or Space (top-down), gamepad A (top-down) or X, or the on-screen **ACT** button, which appears only when something is in range. Pressing interact again on an open promo follows its button, and on a painting it closes the dialogue. The CTA shows the key to press.
+- If the browser blocks a link opened from a gamepad, the link appears in the dialogue with a button to click or tap instead.
+- Clicking or tapping the painting that is already open closes its dialogue. Hover previews are mouse-only, so a tap on a touch screen no longer flashes a preview.
 - Gamepad support: left stick (with a deadzone) or d-pad to move, A to jump in galleries, B to close the dialogue.
 - Esc closes the dialogue.
 

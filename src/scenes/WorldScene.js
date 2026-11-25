@@ -4,6 +4,9 @@ import { createObjectView } from '../world/objectTypes.js';
 import { attachBehavior } from '../world/behaviors.js';
 import { isActive, textureKey } from '../world/loadWorld.js';
 
+/** Max gap (px) between the player's body and an object's bounds for keyboard/gamepad/ACT interaction. */
+const INTERACT_RANGE = 100;
+
 /** Per-mode player + physics setup (kept identical to the legacy scenes). */
 const MODES = {
   topdown: {
@@ -81,7 +84,9 @@ export class WorldScene extends Phaser.Scene {
     this.hud = this.scene.get('Hud');
     this.scene.launch('Hud', { world: this, mode: s.mode, input: this.inputState });
 
-    // World objects from data
+    // World objects from data (behaviours register their interactables via addInteractable)
+    this.interactables = [];
+    this.focusTarget = null;
     this.objectViews = [];
     for (const obj of s.objects) {
       if (!isActive(obj)) continue;
@@ -90,6 +95,13 @@ export class WorldScene extends Phaser.Scene {
       attachBehavior(this, view, obj);
       this.objectViews.push(view);
     }
+
+    // "E · View" prompt floating above the player when something is in range
+    this.prompt = this.add.text(0, 0, '', {
+      fontSize: '14px', color: '#ffffff', fontFamily: 'Arial', fontStyle: 'bold',
+      backgroundColor: '#000000cc', padding: { x: 8, y: 4 },
+    }).setOrigin(0.5, 1).setDepth(1000).setVisible(false);
+    this.boundsTmp = new Phaser.Geom.Rectangle();
 
     this.cameras.main.fadeIn(250, 255, 255, 255);
   }
@@ -104,6 +116,50 @@ export class WorldScene extends Phaser.Scene {
       this.cameraDirector.follow();
     }
     this.controls.update();
+    this.updateInteractFocus();
+    if (input.interactPressed) this.interact();
+  }
+
+  /** Called by behaviours: `activate()` runs when the player interacts while this is the nearest in range. */
+  addInteractable({ target, verb, activate }) {
+    this.interactables.push({ target, verb, activate });
+  }
+
+  /** Pick the nearest interactable in range and place the prompt above the player. */
+  updateInteractFocus() {
+    const body = this.player.body;
+    let best = null;
+    let bestGap = INTERACT_RANGE;
+    for (const it of this.interactables) {
+      const b = it.target.getBounds(this.boundsTmp);
+      const dx = Math.max(b.left - body.right, 0, body.left - b.right);
+      const dy = Math.max(b.top - body.bottom, 0, body.top - b.bottom);
+      const gap = Math.hypot(dx, dy);
+      if (gap <= bestGap) { best = it; bestGap = gap; }
+    }
+    this.focusTarget = best;
+
+    const show = Boolean(best) && !this.isDialogueLocked && !this.isTravelling;
+    this.prompt.setVisible(show);
+    if (show) {
+      this.prompt.setText(`${this.inputState.interactGlyph} · ${best.verb}`);
+      this.prompt.setPosition(this.player.x, body.top - 6);
+    }
+  }
+
+  /** Interact (E / Space / gamepad A·X / ACT): CTA or close an open dialogue, else use the nearest object. */
+  interact() {
+    if (this.isDialogueLocked) {
+      if (!this.dialogue?.activateCta()) this.closeDialogue();
+      return;
+    }
+    this.focusTarget?.activate();
+  }
+
+  /** Glyph for the dialogue's CTA button when it can be pressed from the keyboard / gamepad. */
+  get ctaKeyHint() {
+    const source = this.inputState.source;
+    return source === 'keyboard' || source === 'gamepad' ? this.inputState.interactGlyph : '';
   }
 
   /** Dialogue lives in the HUD scene, which starts one tick after this one (launch is queued). */

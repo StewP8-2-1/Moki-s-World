@@ -3,18 +3,24 @@ import { DialogueUI } from '../DialogueUI.js';
 
 const TOUCH_PREF_KEY = 'mokis-world:touchControls';
 
-/** Per-mode on-screen button layout (base 800×600 canvas; y measured up from the bottom edge). */
+/**
+ * Per-mode on-screen button layout (base 800×600 canvas; negative x is from the right edge, y is
+ * measured up from the bottom). `key` buttons are held (movement / jump); `action` buttons fire once
+ * per press. `contextual` buttons only appear when there is something to interact with.
+ */
 const TOUCH_LAYOUTS = {
   topdown: [
     { key: 'up', label: 'W', x: 120, fromBottom: 160 },
     { key: 'down', label: 'S', x: 120, fromBottom: 60 },
     { key: 'left', label: 'A', x: 50, fromBottom: 110 },
     { key: 'right', label: 'D', x: 190, fromBottom: 110 },
+    { action: 'interact', label: 'ACT', x: -80, fromBottom: 100, w: 90, h: 70, contextual: true },
   ],
   platformer: [
     { key: 'left', label: 'A', x: 70, fromBottom: 70 },
     { key: 'right', label: 'D', x: 150, fromBottom: 70 },
     { key: 'jump', label: 'JUMP', x: -90, fromBottom: 70, w: 100 },
+    { action: 'interact', label: 'ACT', x: -90, fromBottom: 150, w: 100, contextual: true },
   ],
 };
 
@@ -41,6 +47,7 @@ export class HudScene extends Phaser.Scene {
 
   create() {
     this.touchButtons = [];
+    this.interactAvailable = false;
     this.dialogue = new DialogueUI(this, { onClose: () => this.world.closeDialogue() });
     this.createTouchControls();
     this.createMenu();
@@ -70,24 +77,32 @@ export class HudScene extends Phaser.Scene {
     const { width, height } = this.cameras.main;
     for (const spec of TOUCH_LAYOUTS[this.mode] ?? TOUCH_LAYOUTS.topdown) {
       const x = spec.x < 0 ? width + spec.x : spec.x;
-      this.touchButtons.push(this.createTouchButton(x, height - spec.fromBottom, spec.label, spec.key, spec.w, spec.h));
+      this.touchButtons.push(this.createTouchButton(x, height - spec.fromBottom, spec));
     }
   }
 
-  /** A virtual button that stays "down" while at least one pointer holds it (multitouch-safe). */
-  createTouchButton(x, y, label, key, w = 60, h = 60) {
+  /**
+   * A virtual button. Held buttons (`spec.key`) stay down while at least one pointer holds them
+   * (multitouch-safe); action buttons (`spec.action`) send one press to InputState per tap.
+   */
+  createTouchButton(x, y, spec) {
+    const { key, action, label, w = 60, h = 60 } = spec;
     const bg = this.add.rectangle(x, y, w, h, 0x000000, 0.3).setInteractive();
     const text = this.add.text(x, y, label, { fontSize: '20px', color: '#ffffff', fontStyle: 'bold' }).setOrigin(0.5);
     const held = new Set();
     const sync = () => {
       const down = held.size > 0;
-      this.inputState.setTouch(key, down);
+      if (key) this.inputState.setTouch(key, down);
       bg.setFillStyle(0x000000, down ? 0.6 : 0.3);
     };
-    bg.on('pointerdown', (pointer) => { held.add(pointer.id); sync(); });
+    bg.on('pointerdown', (pointer) => {
+      held.add(pointer.id);
+      sync();
+      if (action) this.inputState.pressTouch(action);
+    });
     bg.on('pointerout', (pointer) => { held.delete(pointer.id); sync(); });
     return {
-      bg, text,
+      bg, text, spec,
       setVisible(on) { bg.setVisible(on); text.setVisible(on); if (!on) { held.clear(); sync(); } },
       release(pointer) { if (pointer) held.delete(pointer.id); else held.clear(); sync(); },
     };
@@ -95,19 +110,37 @@ export class HudScene extends Phaser.Scene {
 
   setTouchControlsVisible(on) {
     this.touchVisible = on;
-    this.touchButtons.forEach((b) => b.setVisible(on));
+    this.refreshTouchButtons();
     this.dialogue.setSafeArea(this.computeSafeArea());
     this.menuText?.setText(on ? 'Hide touch controls' : 'Show touch controls');
   }
 
-  /** Horizontal band the bottom dialogue must leave free so it sits between the button clusters. */
+  refreshTouchButtons() {
+    for (const b of this.touchButtons) b.setVisible(this.touchVisible && (!b.spec.contextual || this.interactAvailable));
+  }
+
+  /** Mirrors world state the HUD depends on: the contextual ACT button and the CTA's key hint. */
+  update() {
+    const world = this.world;
+    const available = Boolean(world.focusTarget) && !world.isDialogueLocked;
+    if (available !== this.interactAvailable) {
+      this.interactAvailable = available;
+      this.refreshTouchButtons();
+    }
+    this.dialogue.setKeyHint(world.ctaKeyHint);
+  }
+
+  /**
+   * Horizontal band the bottom dialogue must leave free so it sits between the button clusters.
+   * Contextual buttons count even while hidden, so the box doesn't jump when ACT appears.
+   */
   computeSafeArea() {
     const { width } = this.cameras.main;
     const gap = 8;
     let left = 0;
     let right = 0;
     for (const { bg } of this.touchButtons) {
-      if (!this.touchVisible || !bg.visible) continue;
+      if (!this.touchVisible) continue;
       if (bg.x < width / 2) left = Math.max(left, bg.x + bg.width / 2 + gap);
       else right = Math.max(right, width - (bg.x - bg.width / 2) + gap);
     }

@@ -124,8 +124,7 @@ export class InputState extends Phaser.Events.EventEmitter {
     switch (this.source) {
       case 'gamepad': return this.platformer ? 'X' : 'A';
       case 'touch': return 'ACT';
-      case 'mouse': return 'Click';
-      default: return 'E';
+      default: return 'E'; // keyboard, or mouse (desktop players have E too)
     }
   }
 }
