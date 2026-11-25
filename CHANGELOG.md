@@ -3,7 +3,9 @@
 All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and commits follow [Conventional Commits](https://www.conventionalcommits.org/).
 
-## [Unreleased] — Vercel + Neon rework
+## [Unreleased]
+
+## [1.0.0] — 2026-11-25 — Vercel + Neon rework, visual editor
 
 ### Phase checklist
 - [x] Phase 0: Development process and documentation scaffold
@@ -12,7 +14,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - [x] Phase 3: Admin shell (login, read-only scene view)
 - [x] Phase 4: Visual editing (drag, inspector, palette, undo)
 - [x] Phase 5: Media uploads and publishing (Blob, versions)
-- [ ] Phase 6: Deploy to Vercel
+- [x] Phase 6: Deploy to Vercel. Preview verified; production goes live when this branch is merged to `main`.
 
 ### Added
 - `CLAUDE.md` agent guide with the commands, architecture map and the per-commit documentation workflow.

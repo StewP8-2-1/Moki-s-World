@@ -7,6 +7,12 @@
 - **Previews:** every push to another branch gets its own URL (`moki-s-world-<hash>-stoow.vercel.app`). Preview deployments share the same Neon database and Blob store as production, so **edits made in a preview's editor change the real draft**.
 - **Content changes don't need a deploy.** The editor writes to Neon, and **Publish** makes them live within about a minute.
 
+### Testing a preview deployment
+Preview URLs are behind **Vercel Authentication**; production is public. To script against a preview:
+- **API:** use `npx vercel curl <preview-url>/api/world`, which bypasses protection automatically.
+- **Browsers and scripts:** send the header `x-vercel-protection-bypass: <secret>`. The secret is the project's *Protection Bypass for Automation* secret (Settings → Deployment Protection); never commit it. Add `x-vercel-set-bypass-cookie: true` to keep the bypass for the rest of a browser session.
+- **Timing:** right after a publish, `/api/world` on the CDN can serve the previous version for up to 60 s (`Vercel-CDN-Cache-Control`). Tests that check "live after publish" must wait or poll.
+
 ## `vercel.json`
 | Setting | Why |
 |---|---|
