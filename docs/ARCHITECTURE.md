@@ -1,18 +1,19 @@
 # Architecture
 
-> Status: Phases 1–3 are implemented: the API, the DB, the data-driven game, admin auth and the read-only editor. Editing and publishing (Phases 4–5) are still planned.
+> Status: Phases 1–4 are implemented: the API, the DB, the data-driven game, admin auth and the visual editor with autosave. Publishing and uploads (Phase 5) are still planned.
 
 ## Editor (`src/admin/`)
 | File | Role |
 |---|---|
 | `admin.html` | The page shell: login, top bar, side panels and the canvas host |
-| `main.js` | Editor state (`world`, `sceneId`, `selectedId`), DOM panels, the Phaser game (RESIZE mode) and keyboard shortcuts |
-| `EditorScene.js` | Renders one scene with `createObjectView` plus overlays (grid, bounds, ground, player start, selection). Handles zoom and pan, and reports selection through `onSelect` |
-| `inspector.js` | Builds the inspector form from `OBJECT_TYPES[type].fields`, plus `objectName()` |
+| `store.js` | **Document store.** Holds the draft and applies edits locally first. It persists them through per-entity ordered queues, with object PATCHes debounced by 350 ms. It also keeps undo/redo history, where edits to the same field within 1.2 s coalesce into one step, and emits events |
+| `main.js` | UI state (`sceneId`, `selectedId`), panels (palette, layers, scene settings, inspector), the new-scene dialog, toasts, keyboard shortcuts and palette drag-and-drop |
+| `EditorScene.js` | Renders one scene with `createObjectView` plus overlays: grid, bounds, ground, a draggable player start, and the selection with its resize handle. It moves and resizes objects by dragging (measured from pointer-down, with snap), loads changed images on demand, and listens to store events so undo/redo and inspector edits show up on the map |
+| `inspector.js` | `buildForm()`/`syncForm()`: auto-saving forms generated from field specs, with client-side checks so half-typed values aren't sent. Also `renderInspector()` and `objectName()` |
 | `api.js` | Fetch wrapper for `/api/admin/*` |
 | `admin.css` | Styles, with light/dark and narrow-screen layouts |
 
-The DOM side owns the state. The canvas reports selection changes through callbacks, and the DOM side calls methods on the scene (`select`, `fit`, `zoomBy`). Switching scenes restarts `EditorScene` with new init data; textures stay cached across scenes.
+Data flow: every edit, whether a canvas drag, an inspector field, a keyboard shortcut or undo, calls a **store** method. The store updates the in-memory draft, emits `object:update`/`create`/`delete`/`scene:update`, and queues the API call. Both the canvas and the DOM panels re-render from those events, so they can't drift apart. Switching scenes restarts `EditorScene`; its store subscriptions are removed on `shutdown`, and textures stay cached.
 
 ## Adding a new object type
 1. `src/world/objectTypes.js`: add `label`, `icon`, `defaults`, `fields` and `create`.

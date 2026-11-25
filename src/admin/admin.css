@@ -85,8 +85,7 @@ input:disabled, textarea:disabled, select:disabled { opacity: .8; }
 }
 .brand { font-weight: 700; white-space: nowrap; }
 .scene-picker select { min-width: 220px; height: 32px; padding: 0 8px; }
-.zoom-group { display: flex; gap: 4px; }
-.zoom-group #zoom-fit { min-width: 64px; }
+#zoom-fit { min-width: 64px; }
 .spacer { flex: 1; }
 
 .panel {
@@ -95,7 +94,8 @@ input:disabled, textarea:disabled, select:disabled { opacity: .8; }
 }
 .panel.left { grid-area: left; border-right: 1px solid var(--line); }
 .panel.right { grid-area: right; border-left: 1px solid var(--line); }
-.panel .grow { flex: 1; min-height: 0; }
+.panel > * { flex-shrink: 0; }
+.panel .grow { flex: 1 0 auto; }
 
 .info { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0; }
 .info dt { color: var(--muted); }
@@ -144,3 +144,62 @@ input:disabled, textarea:disabled, select:disabled { opacity: .8; }
   .scene-picker select { min-width: 0; }
   .panel.left, .panel.right { border: 0; border-top: 1px solid var(--line); }
 }
+
+/* ---------- Phase 4: editing ---------- */
+.small { font-size: 12px; margin: 8px 0 0; }
+.group { display: flex; gap: 4px; }
+.toggle { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; cursor: pointer; }
+.toggle input { width: auto; }
+.btn.danger { color: var(--danger); }
+.btn.danger:hover { border-color: var(--danger); }
+.btn.full { width: 100%; margin-top: 8px; }
+
+.save-status { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.save-status.saving { color: var(--warn); }
+.save-status.error { color: var(--danger); font-weight: 600; }
+
+.palette { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.palette button {
+  display: grid; justify-items: center; gap: 2px; padding: 8px 4px;
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel);
+  color: var(--text); font: inherit; font-size: 12px; cursor: grab;
+}
+.palette button:hover { border-color: var(--accent); background: var(--accent-soft); }
+.palette button .icon { font-size: 20px; }
+.canvas-wrap.drop-target { outline: 3px dashed var(--accent); outline-offset: -3px; }
+
+.settings summary { cursor: pointer; list-style: none; }
+.settings summary::-webkit-details-marker { display: none; }
+.settings summary h2 { display: inline; }
+.settings summary::after { content: ' ▸'; color: var(--muted); }
+.settings[open] summary::after { content: ' ▾'; }
+.settings[open] summary { margin-bottom: 10px; }
+
+.inspector-head { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
+.inspector-head .spacer { flex: 1; }
+.image-field { display: grid; gap: 6px; }
+.image-row { display: flex; gap: 6px; }
+.image-row input { flex: 1; min-width: 0; }
+.field-hint { color: var(--danger); min-height: 0; }
+.field-hint:empty { display: none; }
+
+.dialog { border: 1px solid var(--line); border-radius: 14px; padding: 22px; width: min(420px, calc(100vw - 32px)); background: var(--panel); color: var(--text); }
+.dialog::backdrop { background: rgb(0 0 0 / .35); }
+.dialog-title { font-size: 18px; text-transform: none; letter-spacing: 0; color: var(--text); margin-bottom: 14px; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+.toasts { position: fixed; right: 16px; bottom: 16px; display: grid; gap: 8px; z-index: 50; max-width: min(380px, calc(100vw - 32px)); }
+.toast {
+  display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px;
+  border-radius: var(--radius); background: var(--text); color: var(--panel);
+  box-shadow: 0 6px 24px rgb(0 0 0 / .2); font-size: 13px;
+}
+.toast.error { background: var(--danger); color: #fff; }
+.toast button { margin-left: auto; background: transparent; border: 0; color: inherit; cursor: pointer; font-size: 16px; line-height: 1; }
+
+@media (max-width: 900px) {
+  .palette { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .toggle, .save-status { font-size: 12px; }
+}
+input[type="color"] { height: 34px; padding: 3px; cursor: pointer; }
+input[aria-invalid="true"] { border-color: var(--danger); }

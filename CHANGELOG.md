@@ -10,7 +10,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - [x] Phase 1: Backend foundation (schema, `/api/world`, seed). Live Neon DB seeded, version 1 published.
 - [x] Phase 2: Data-driven game (object registry, WorldScene)
 - [x] Phase 3: Admin shell (login, read-only scene view)
-- [ ] Phase 4: Visual editing (drag, inspector, palette, undo)
+- [x] Phase 4: Visual editing (drag, inspector, palette, undo)
 - [ ] Phase 5: Media uploads and publishing (Blob, versions)
 - [ ] Phase 6: Deploy to Vercel
 
@@ -64,11 +64,25 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   - `GET`/`POST /api/admin/objects` and `PATCH`/`DELETE /api/admin/objects/:id`. The client can supply object ids, and patches are merged and re-validated.
 - New `draft_state` table, plus `hasUnpublishedChanges` in `/api/admin/draft`.
 - `npm run db:migrate` (`scripts/migrate.js`) applies the schema. The seed reuses it.
+- Visual editing in the admin editor:
+  - `src/admin/store.js`: optimistic document store with ordered, debounced autosave and undo/redo. Typing, drags and nudges coalesce into one step, and undoing a delete restores the same id.
+  - Add-to-scene palette: click to add at the view centre, or drag onto the map.
+  - Moving objects by drag, with a 10 px snap toggle.
+  - A corner handle for resizing.
+  - A draggable player start.
+  - An editable inspector with Duplicate and Delete. It checks values client-side (incomplete URLs, required fields and number ranges show inline hints instead of failing saves).
+  - Scene settings: name, type, size, player start, background and ground.
+  - A New scene dialog that adds a return portal automatically. Delete scene asks for confirmation.
+  - Keyboard shortcuts: Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y, Delete, Ctrl+D, arrow-key nudge, F and Esc.
+  - A save status indicator, an "Unpublished changes" pill and toasts.
+  - Changed image URLs load on demand.
+- `public/placeholder.png`: the default image for new objects.
 - `scripts/viteDevApi.js`: a Vite dev middleware that runs the `/api` functions locally. It follows Vercel's filesystem routing, including `[param].js`, so `npm run dev` is full-stack.
 
 ### Changed
 - The game is now fully data-driven, and `main.js` registers only `BootScene` and `WorldScene`. Relative asset paths resolve against the Vite base URL.
 - `constants.js` keeps only the canvas size; world sizes now come from the data.
+- Object registry defaults now use `placeholder.png` and valid example URLs, so new objects pass validation immediately.
 - `api/lib` was renamed to `api/_lib`, so Vercel doesn't deploy the helpers as public functions.
 - `vite.config.js`:
   - It builds `index.html` and `admin.html` as a multi-page app.

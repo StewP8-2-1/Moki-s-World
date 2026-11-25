@@ -16,9 +16,19 @@ async function request(method, url, body) {
   return data;
 }
 
+const enc = encodeURIComponent;
+
 export const api = {
   me: () => request('GET', '/api/admin/me'),
   login: (password) => request('POST', '/api/admin/login', { password }),
   logout: () => request('POST', '/api/admin/logout', {}),
   draft: () => request('GET', '/api/admin/draft'),
+
+  createObject: (obj) => request('POST', '/api/admin/objects', obj),
+  patchObject: (id, patch) => request('PATCH', `/api/admin/objects/${enc(id)}`, patch),
+  deleteObject: (id) => request('DELETE', `/api/admin/objects/${enc(id)}`),
+
+  createScene: (scene) => request('POST', '/api/admin/scenes', scene),
+  updateScene: (id, patch) => request('PUT', `/api/admin/scenes/${enc(id)}`, patch),
+  deleteScene: (id) => request('DELETE', `/api/admin/scenes/${enc(id)}`),
 };

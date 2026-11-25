@@ -24,7 +24,7 @@ const IMAGE_FIELD = { key: 'imageUrl', label: 'Image', input: 'image', required:
 export const OBJECT_TYPES = {
   painting: {
     label: 'Painting', icon: '🖼️',
-    defaults: { size: 160, depth: -1, props: { imageUrl: '', title: 'Untitled', description: '', panOnClick: true } },
+    defaults: { size: 160, depth: -1, props: { imageUrl: 'placeholder.png', title: 'Untitled', description: '', panOnClick: true } },
     fields: [
       IMAGE_FIELD,
       { key: 'title', label: 'Title', input: 'textarea', rows: 2 },
@@ -35,7 +35,7 @@ export const OBJECT_TYPES = {
   },
   link: {
     label: 'Link', icon: '🔗',
-    defaults: { size: 100, depth: -1, props: { imageUrl: '', url: 'https://', openInNewTab: true, label: 'Visit', labelSize: 18, labelOffset: -80 } },
+    defaults: { size: 100, depth: -1, props: { imageUrl: 'placeholder.png', url: 'https://example.com', openInNewTab: true, label: 'Visit', labelSize: 18, labelOffset: -80 } },
     fields: [
       IMAGE_FIELD,
       { key: 'url', label: 'Link URL', input: 'url', required: true },
@@ -56,7 +56,7 @@ export const OBJECT_TYPES = {
   },
   promo: {
     label: 'Promo', icon: '📣',
-    defaults: { size: 160, depth: -1, props: { imageUrl: '', title: 'New!', body: '', ctaLabel: 'Learn more', ctaUrl: 'https://', startsAt: null, endsAt: null } },
+    defaults: { size: 160, depth: -1, props: { imageUrl: 'placeholder.png', title: 'New!', body: '', ctaLabel: 'Learn more', ctaUrl: '', startsAt: null, endsAt: null } },
     fields: [
       IMAGE_FIELD,
       { key: 'title', label: 'Title', input: 'text' },
@@ -83,7 +83,7 @@ export const OBJECT_TYPES = {
   },
   decor: {
     label: 'Decoration', icon: '🌿',
-    defaults: { size: 120, depth: -2, props: { imageUrl: '' } },
+    defaults: { size: 120, depth: -2, props: { imageUrl: 'placeholder.png' } },
     fields: [IMAGE_FIELD],
     create: imageWithLabel,
   },

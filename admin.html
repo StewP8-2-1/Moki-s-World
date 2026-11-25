@@ -28,12 +28,21 @@
           <span class="sr-only">Scene</span>
           <select id="scene-select"></select>
         </label>
-        <div class="zoom-group" role="group" aria-label="Zoom">
+        <button class="btn icon" id="new-scene" title="New scene">＋</button>
+        <div class="group" role="group" aria-label="History">
+          <button class="btn icon" id="undo" title="Undo (Ctrl+Z)" disabled>↶</button>
+          <button class="btn icon" id="redo" title="Redo (Ctrl+Shift+Z)" disabled>↷</button>
+        </div>
+        <div class="group" role="group" aria-label="Zoom">
           <button class="btn icon" id="zoom-out" title="Zoom out">−</button>
           <button class="btn" id="zoom-fit" title="Fit scene to screen (F)"><span id="zoom-label">100%</span></button>
           <button class="btn icon" id="zoom-in" title="Zoom in">+</button>
         </div>
+        <label class="toggle" title="Snap positions to a 10px grid">
+          <input type="checkbox" id="snap" checked /> Snap
+        </label>
         <div class="spacer"></div>
+        <span id="save-status" class="save-status" aria-live="polite"></span>
         <span id="status" class="pill"></span>
         <a class="btn" href="/" target="_blank" rel="noopener">View site ↗</a>
         <button class="btn" id="logout">Sign out</button>
@@ -41,27 +50,59 @@
 
       <aside class="panel left">
         <section>
-          <h2>Scene</h2>
-          <dl id="scene-info" class="info"></dl>
+          <h2>Add to scene</h2>
+          <div id="palette" class="palette"></div>
+          <p class="muted small">Click to add in the middle of the view, or drag onto the map.</p>
         </section>
         <section class="grow">
           <h2>Objects <span id="object-count" class="muted"></span></h2>
           <ul id="layers" class="layers"></ul>
         </section>
+        <details id="scene-settings" class="settings">
+          <summary><h2>Scene settings</h2></summary>
+          <div id="scene-form"></div>
+          <button class="btn danger full" id="delete-scene" type="button">Delete this scene</button>
+        </details>
       </aside>
 
-      <main class="canvas-wrap">
+      <main class="canvas-wrap" id="canvas-wrap">
         <div id="editor-canvas"></div>
-        <div class="hint">Scroll to zoom · drag empty space to pan · click an object to inspect it</div>
+        <div class="hint">Drag objects to move · corner handle to resize · scroll to zoom · drag empty space to pan</div>
       </main>
 
       <aside class="panel right">
         <section class="grow">
           <h2 id="inspector-title">Inspector</h2>
-          <div id="inspector"><p class="muted">Select an object on the map or in the list.</p></div>
+          <div id="inspector"></div>
         </section>
       </aside>
     </section>
+
+    <!-- New scene dialog -->
+    <dialog id="new-scene-dialog" class="dialog">
+      <form method="dialog" id="new-scene-form">
+        <h2 class="dialog-title">New scene</h2>
+        <label class="field"><span>Name</span><input name="name" required maxlength="100" placeholder="e.g. Merch Corner" /></label>
+        <label class="field"><span>Type</span>
+          <select name="mode">
+            <option value="platformer">Side-scroller gallery (walk + jump)</option>
+            <option value="topdown">Top-down room (walk in all directions)</option>
+          </select>
+        </label>
+        <div class="row2">
+          <label class="field"><span>Width (px)</span><input name="width" type="number" min="200" max="20000" value="2400" required /></label>
+          <label class="field"><span>Height (px)</span><input name="height" type="number" min="200" max="20000" value="900" required /></label>
+        </div>
+        <label class="field check"><input name="returnPortal" type="checkbox" checked /><span>Add a portal back to the hub</span></label>
+        <p class="error" id="new-scene-error" role="alert"></p>
+        <div class="dialog-actions">
+          <button class="btn" value="cancel" formnovalidate>Cancel</button>
+          <button class="btn primary" value="create" id="new-scene-create">Create scene</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toasts" class="toasts" aria-live="assertive"></div>
 
     <script type="module" src="./src/admin/main.js"></script>
   </body>
