@@ -51,6 +51,11 @@ export class HudScene extends Phaser.Scene {
     this.dialogue = new DialogueUI(this, { onClose: () => this.world.closeDialogue() });
     this.createTouchControls();
     this.createMenu();
+    // Interact prompt, fixed at the top-left of the screen ("E · View — Renaissance")
+    this.prompt = this.add.text(12, 12, '', {
+      fontSize: '16px', color: '#ffffff', fontFamily: 'Arial', fontStyle: 'bold',
+      backgroundColor: '#000000cc', padding: { x: 10, y: 6 },
+    }).setOrigin(0, 0).setDepth(150).setVisible(false);
     this.touchPref = loadTouchPref(); // null = automatic
     this.setTouchControlsVisible(this.touchPref ?? this.sys.game.device.input.touch);
     const onSource = (source) => {
@@ -119,9 +124,14 @@ export class HudScene extends Phaser.Scene {
     for (const b of this.touchButtons) b.setVisible(this.touchVisible && (!b.spec.contextual || this.interactAvailable));
   }
 
-  /** Mirrors world state the HUD depends on: the contextual ACT button and the CTA's key hint. */
+  /** Mirrors world state the HUD depends on: the interact prompt, the ACT button and the CTA's key hint. */
   update() {
     const world = this.world;
+    const prompt = world.interactPrompt ?? null;
+    if (prompt !== this.promptText) {
+      this.promptText = prompt;
+      this.prompt.setText(prompt ?? '').setVisible(Boolean(prompt));
+    }
     const available = Boolean(world.focusTarget) && !world.isDialogueLocked;
     if (available !== this.interactAvailable) {
       this.interactAvailable = available;

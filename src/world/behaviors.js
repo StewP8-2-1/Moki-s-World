@@ -24,6 +24,15 @@ function openUrl(url, newTab = true) {
   return true;
 }
 
+/**
+ * Short single-line name for the HUD prompt: the last non-empty line of a title (painting titles
+ * are "Requested by: …\nArtwork name"), capped in length.
+ */
+function promptName(text) {
+  const line = String(text || '').split(/\r?\n/).map((l) => l.trim()).filter(Boolean).pop() || '';
+  return line.length > 32 ? `${line.slice(0, 31)}…` : line;
+}
+
 /** Hover previews the dialogue (mouse only); click / interact locks it, and clicking again closes it. */
 function attachDialogue(scene, view, data, { pan }) {
   const target = view.main;
@@ -41,7 +50,7 @@ function attachDialogue(scene, view, data, { pan }) {
     else open();
   });
 
-  scene.addInteractable({ target, verb: 'View', activate: open });
+  scene.addInteractable({ target, verb: 'View', name: promptName(data.title), activate: open });
 }
 
 export const BEHAVIORS = {
@@ -72,7 +81,7 @@ export const BEHAVIORS = {
       event.stopPropagation();
       activate();
     });
-    scene.addInteractable({ target, verb: 'Open', activate });
+    scene.addInteractable({ target, verb: 'Open', name: promptName(label), activate });
   },
 
   portal(scene, view, obj) {
