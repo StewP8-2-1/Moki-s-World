@@ -56,13 +56,26 @@ export class DialogueUI {
       wordWrap: { width: wrapWidth }
     }).setOrigin(0.5, 0);
 
-    this.container.add([bg, this.titleText, this.descText]);
+    // Optional call-to-action button (used by promo objects)
+    this.ctaText = this.scene.add.text(0, -this.paddingTop, '', {
+      fontSize: '16px', fill: '#000000', backgroundColor: '#ffd84d', fontStyle: 'bold',
+      padding: { x: 12, y: 6 },
+    }).setOrigin(0.5, 1).setVisible(false).setInteractive({ useHandCursor: true });
+    this.ctaText.on('pointerdown', (pointer, localX, localY, event) => {
+      event.stopPropagation();
+      if (/^https?:\/\//i.test(this.ctaUrl || '')) window.open(this.ctaUrl, '_blank', 'noopener');
+    });
+
+    this.container.add([bg, this.titleText, this.descText, this.ctaText]);
   }
 
-  // UPDATED: Now only requires the artData, no position tracking needed
-  show(artData) {
-    this.titleText.setText(artData.title);
-    this.descText.setText(artData.description);
+  /** @param {{ title?: string, description?: string, ctaLabel?: string, ctaUrl?: string }} data */
+  show(data) {
+    this.titleText.setText(data.title || '');
+    this.descText.setText(data.description || '');
+    this.ctaUrl = data.ctaUrl;
+    const hasCta = Boolean(data.ctaLabel && data.ctaUrl);
+    this.ctaText.setText(hasCta ? data.ctaLabel : '').setVisible(hasCta);
     this.container.setVisible(true);
   }
 

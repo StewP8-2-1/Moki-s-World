@@ -1,0 +1,336 @@
+{
+  "format": 1,
+  "version": 0,
+  "publishedAt": null,
+  "startScene": "hub",
+  "scenes": [
+    {
+      "id": "hub",
+      "name": "Moki's Hub",
+      "mode": "topdown",
+      "width": 900,
+      "height": 900,
+      "spawn": {
+        "x": 400,
+        "y": 300
+      },
+      "background": {
+        "color": "#ffffff"
+      },
+      "ground": null,
+      "sort": 0,
+      "objects": [
+        {
+          "id": "8adaf432-63de-5b55-b06b-80817eb62ab2",
+          "type": "link",
+          "x": 400,
+          "y": 180,
+          "size": 100,
+          "rotation": 0,
+          "depth": -1,
+          "visible": true,
+          "props": {
+            "imageUrl": "Facebook.png",
+            "url": "https://www.facebook.com/yyessa.v",
+            "openInNewTab": true,
+            "label": "Follow on Facebook!",
+            "labelSize": 18,
+            "labelOffset": -80
+          }
+        },
+        {
+          "id": "662730eb-1b85-520e-a6e5-9f530b2f476c",
+          "type": "link",
+          "x": 200,
+          "y": 180,
+          "size": 100,
+          "rotation": 0,
+          "depth": -1,
+          "visible": true,
+          "props": {
+            "imageUrl": "Twitter.png",
+            "url": "https://twitter.com/ayessamoki",
+            "openInNewTab": true,
+            "label": "Follow on Twitter!",
+            "labelSize": 18,
+            "labelOffset": -80
+          }
+        },
+        {
+          "id": "c8d6b684-506d-5a54-a2db-6bab61e74032",
+          "type": "link",
+          "x": 600,
+          "y": 180,
+          "size": 100,
+          "rotation": 0,
+          "depth": -1,
+          "visible": true,
+          "props": {
+            "imageUrl": "IG.png",
+            "url": "https://www.instagram.com/ayessamoki",
+            "openInNewTab": true,
+            "label": "Follow on Instagram!",
+            "labelSize": 18,
+            "labelOffset": -80
+          }
+        },
+        {
+          "id": "022e9d04-9ded-5637-9fc7-715a999ab74a",
+          "type": "portal",
+          "x": 700,
+          "y": 400,
+          "size": 100,
+          "rotation": 0,
+          "depth": 0,
+          "visible": true,
+          "props": {
+            "imageUrl": "Portal-Paint.png",
+            "targetScene": "requested",
+            "label": "Requested Art Gallery",
+            "labelSize": 24,
+            "labelOffset": -60
+          }
+        },
+        {
+          "id": "3f563570-c69a-5036-ac66-420b2ca3ed64",
+          "type": "portal",
+          "x": 200,
+          "y": 800,
+          "size": 100,
+          "rotation": 0,
+          "depth": 0,
+          "visible": true,
+          "props": {
+            "imageUrl": "Portal-Paint.png",
+            "targetScene": "artwork",
+            "label": "Artwork Showcase",
+            "labelSize": 24,
+            "labelOffset": -60
+          }
+        }
+      ]
+    },
+    {
+      "id": "requested",
+      "name": "Requested Art Gallery",
+      "mode": "platformer",
+      "width": 3600,
+      "height": 900,
+      "spawn": {
+        "x": 170,
+        "y": 538
+      },
+      "background": {
+        "color": "#ffffff"
+      },
+      "ground": {
+        "y": 580,
+        "height": 40,
+        "color": "#000000"
+      },
+      "sort": 1,
+      "objects": [
+        {
+          "id": "2b8a1cd6-bc3a-5d84-a55f-5c81d1cdc725",
+          "type": "painting",
+          "x": 400,
+          "y": 350,
+          "size": 160,
+          "rotation": 0,
+          "depth": -1,
+          "visible": true,
+          "props": {
+            "imageUrl": "RMAC/April2026/Renaissance.jpg",
+            "title": "Requested by: Ar Win\nRenaissance",
+            "description": "A beautiful depiction of the rebirth of art and culture.",
+            "panOnClick": true
+          }
+        },
+        {
+          "id": "8e413a91-03fa-5ad9-b081-ba1541ae3c78",
+          "type": "painting",
+          "x": 700,
+          "y": 350,
+          "size": 160,
+          "rotation": 0,
+          "depth": -1,
+          "visible": true,
+          "props": {
+            "imageUrl": "RMAC/April2026/safari drive.jpg",
+            "title": "Requested by: Justin David\nSafari Drive",
+            "description": "An adventurous journey through the wild landscapes of Africa.",
+            "panOnClick": true
+          }
+        },
+        {
+          "id": "28af77cf-a86e-5182-ac00-b3922468a41a",
+          "type": "painting",
+          "x": 1000,
+          "y": 350,
+          "size": 160,
+          "rotation": 0,
+          "depth": -1,
+          "visible": true,
+          "props": {
+            "imageUrl": "RMAC/April2026/infections of a different kind.jpg",
+            "title": "Requested by: Lennox Valo\nInfections of a Different Kind",
+            "description": "A captivating piece that explores the complexities of human emotion.",
+            "panOnClick": true
+          }
+        },
+        {
+          "id": "c528dc8f-4861-528b-ae75-31d323a09c80",
+          "type": "painting",
+          "x": 1300,
+          "y": 350,
+          "size": 160,
+          "rotation": 0,
+          "depth": -1,
+          "visible": true,
+          "props": {
+            "imageUrl": "RMAC/April2026/there's this girl.jpg",
+            "title": "Requested by: Nikko Dullo\nThere's This Girl",
+            "description": "A heartfelt portrayal of love and longing.",
+            "panOnClick": true
+          }
+        },
+        {
+          "id": "29c318a1-17c3-56ab-b3e2-0500332c538e",
+          "type": "painting",
+          "x": 1600,
+          "y": 350,
+          "size": 160,
+          "rotation": 0,
+          "depth": -1,
+          "visible": true,
+          "props": {
+            "imageUrl": "RMAC/July2026/say i am you.jpg",
+            "title": "Requested by: Nonie R. Pahilga\nSay I Am You",
+            "description": "An abstract expression of identity and belonging.",
+            "panOnClick": true
+          }
+        },
+        {
+          "id": "a47e3275-8bbd-5073-889a-f5ac53eb2222",
+          "type": "painting",
+          "x": 1900,
+          "y": 350,
+          "size": 160,
+          "rotation": 0,
+          "depth": -1,
+          "visible": true,
+          "props": {
+            "imageUrl": "RMAC/July2026/Thank you blue.jpg",
+            "title": "Requested by: Ezekiel Ayag\nThank You Blue",
+            "description": "A soothing composition dominated by calm and melancholy blue tones.",
+            "panOnClick": true
+          }
+        },
+        {
+          "id": "37e84730-7283-5ecb-97f0-925eaf495990",
+          "type": "painting",
+          "x": 2200,
+          "y": 350,
+          "size": 160,
+          "rotation": 0,
+          "depth": -1,
+          "visible": true,
+          "props": {
+            "imageUrl": "RMAC/July2026/news of the world.jpg",
+            "title": "Requested by: Bao Bao\nNews of the World",
+            "description": "A fascinating piece depicting the news of the world. Notice the intricate details.",
+            "panOnClick": true
+          }
+        },
+        {
+          "id": "6f0ad4b0-351c-5338-84a7-8c32ce07c048",
+          "type": "painting",
+          "x": 2500,
+          "y": 350,
+          "size": 160,
+          "rotation": 0,
+          "depth": -1,
+          "visible": true,
+          "props": {
+            "imageUrl": "RMAC/July2026/toho eurobeat.jpg",
+            "title": "Requested by: 绯杳\n a-one records - toho eurobeat vol.6 phantasmagoria of flower view",
+            "description": "A vibrant and energetic piece inspired by the iconic Toho Eurobeat sound.",
+            "panOnClick": true
+          }
+        },
+        {
+          "id": "206cc744-46ac-5fc8-866b-a22ddfd55ddc",
+          "type": "portal",
+          "x": 75,
+          "y": 500,
+          "size": 100,
+          "rotation": 0,
+          "depth": 0,
+          "visible": true,
+          "props": {
+            "imageUrl": "Portal-Paint.png",
+            "targetScene": "hub",
+            "label": "Return to Moki's Hub",
+            "labelSize": 16,
+            "labelOffset": -50
+          }
+        }
+      ]
+    },
+    {
+      "id": "artwork",
+      "name": "Artwork Showcase",
+      "mode": "platformer",
+      "width": 3600,
+      "height": 900,
+      "spawn": {
+        "x": 175,
+        "y": 538
+      },
+      "background": {
+        "color": "#ffffff"
+      },
+      "ground": {
+        "y": 580,
+        "height": 40,
+        "color": "#000000"
+      },
+      "sort": 2,
+      "objects": [
+        {
+          "id": "62065b4c-d362-5323-8876-d402bdc59b26",
+          "type": "painting",
+          "x": 250,
+          "y": 350,
+          "size": 300,
+          "rotation": 0,
+          "depth": -1,
+          "visible": true,
+          "props": {
+            "imageUrl": "Out in The Field Grass.jpg",
+            "title": "Out in The Field Grass",
+            "description": "Moki Out in the Field of Grass",
+            "panOnClick": false
+          }
+        },
+        {
+          "id": "d98ecb8e-f8a6-54b4-9bad-1e6d9fa2b9eb",
+          "type": "portal",
+          "x": 75,
+          "y": 500,
+          "size": 100,
+          "rotation": 0,
+          "depth": 0,
+          "visible": true,
+          "props": {
+            "imageUrl": "Portal-Paint.png",
+            "targetScene": "hub",
+            "label": "Return to Moki's Hub",
+            "labelSize": 16,
+            "labelOffset": -50
+          }
+        }
+      ]
+    }
+  ]
+}

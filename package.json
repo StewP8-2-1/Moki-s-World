@@ -1,17 +1,23 @@
 {
   "name": "mokis-world",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "db:seed": "node --env-file-if-exists=.env.local scripts/seed.js",
+    "dev:full": "vercel dev",
+    "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate.js"
   },
   "devDependencies": {
     "vite": "^8.3.0"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.2.1",
+    "@vercel/blob": "^2.9.0",
+    "jose": "^6.2.18",
     "phaser": "^4.2.1"
   }
 }
