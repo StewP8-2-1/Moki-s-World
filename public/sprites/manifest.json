@@ -1,0 +1,14 @@
+{
+  "sprites": {
+    "ayessa": {
+      "kind": "static",
+      "file": "sprites/ayessa.png",
+      "width": 512,
+      "height": 512,
+      "subject": "Grace Ayessa doodle girl",
+      "provider": "svg",
+      "keepColor": false,
+      "updatedAt": "2026-11-25T12:40:02.891Z"
+    }
+  }
+}

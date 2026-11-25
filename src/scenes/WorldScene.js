@@ -3,6 +3,7 @@ import { TopDownController, PlatformerController, InputState, CameraDirector } f
 import { createObjectView } from '../world/objectTypes.js';
 import { attachBehavior } from '../world/behaviors.js';
 import { isActive, textureKey } from '../world/loadWorld.js';
+import { NpcChat } from '../ui/NpcChat.js';
 
 /** Max gap (px) between the player's body and an object's bounds for keyboard/gamepad/ACT interaction. */
 const INTERACT_RANGE = 100;
@@ -106,10 +107,14 @@ export class WorldScene extends Phaser.Scene {
   update() {
     const input = this.inputState;
     input.update();
-    if (input.cancelPressed) this.closeDialogue();
-    if (input.isMoving) {
-      // Walking away closes a locked dialogue and brings the camera back to the player
+    if (input.cancelPressed) {
       this.closeDialogue();
+      this.closeChat();
+    }
+    if (input.isMoving) {
+      // Walking away closes a locked dialogue / NPC chat and brings the camera back to the player
+      this.closeDialogue();
+      this.closeChat();
       this.cameraDirector.follow();
     }
     this.controls.update();
@@ -136,7 +141,7 @@ export class WorldScene extends Phaser.Scene {
     }
     this.focusTarget = best;
 
-    const show = Boolean(best) && !this.isDialogueLocked && !this.isTravelling;
+    const show = Boolean(best) && !this.isDialogueLocked && !this.isTravelling && !this.chat?.isOpen;
     this.interactPrompt = show
       ? `${this.inputState.interactGlyph} · ${best.verb}${best.name ? ` — ${best.name}` : ''}`
       : null;
@@ -192,6 +197,35 @@ export class WorldScene extends Phaser.Scene {
     this.isDialogueLocked = false;
     this.dialogueTarget = null;
     this.hideDialogue();
+    this.cameraDirector.follow();
+  }
+
+  /**
+   * Open the DOM chat panel for an NPC. Game keyboard input is suspended while it is open so typing
+   * doesn't move the player; Esc / ✕ / walking away (gamepad) closes it.
+   */
+  openChat(obj, target) {
+    this.closeDialogue();
+    if (!this.chat) {
+      this.chat = new NpcChat({ onClose: () => this.onChatClosed() });
+      this.events.once('shutdown', () => { this.chat?.destroy(); this.chat = null; });
+    }
+    if (this.chat.isOpen && this.chat.npcId === obj.id) return;
+    this.input.keyboard.enabled = false;
+    this.input.keyboard.disableGlobalCapture();
+    this.input.keyboard.resetKeys();
+    this.cameraDirector.focusOn(target.x, target.y, { edge: 'bottom', size: this.cameras.main.height * 0.45 });
+    this.chat.open({ npcId: obj.id, name: obj.props.name, greeting: obj.props.greeting, draft: Boolean(this.registry.get('world')?.draft) });
+  }
+
+  closeChat() {
+    if (this.chat?.isOpen) this.chat.close();
+  }
+
+  onChatClosed() {
+    this.input.keyboard.enabled = true;
+    this.input.keyboard.enableGlobalCapture();
+    this.input.keyboard.resetKeys();
     this.cameraDirector.follow();
   }
 

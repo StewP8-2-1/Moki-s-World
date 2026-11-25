@@ -41,7 +41,7 @@ Vite multi-page app (static)          Vercel Functions (/api)              Neon 
 - If the API is unreachable, the game falls back to `src/data/fallbackWorld.json`, which is bundled at build time.
 
 ### Shared object registry
-`src/world/objectTypes.js` defines each object type (`painting`, `link`, `portal`, `promo`, `text`, `decor`). Each type has:
+`src/world/objectTypes.js` defines each object type (`painting`, `link`, `portal`, `promo`, `text`, `decor`, `npc`). Each type has:
 - `defaults`: default props for new objects
 - `fields`: the inspector form schema
 - `create(scene, obj)`: builds the Phaser GameObject
@@ -84,7 +84,9 @@ Any movement input closes a locked dialogue and returns the camera to `follow`.
 | `src/world/` | Object registry, behaviours, world loader |
 | `src/scenes/` | Boot, World and HUD scenes |
 | `src/admin/` | Admin editor |
-| `api/world.js`, `api/admin.js` | The only two Vercel Functions. `admin.js` routes every `/api/admin/*` request |
+| `src/ui/NpcChat.js` | NPC chat panel (DOM overlay, reads the `/api/npc` NDJSON stream) |
+| `api/world.js`, `api/admin.js`, `api/npc.js` | The only three Vercel Functions. `admin.js` routes every `/api/admin/*` request; `npc.js` is the public NPC chat |
+| `api/_lib/npc/` | NPC agent (Vercel AI SDK), scraper, search, SSRF-safe fetch, rate limits, knowledge store. Shared with the studio CLI |
 | `api/_admin/`, `api/_lib/` | Admin handlers and shared helpers (not deployed as functions) |
 | `vercel.json` | Framework, clean URLs (`/admin`), the admin rewrite and security/caching headers |
 | `db/schema.sql` | Database schema |

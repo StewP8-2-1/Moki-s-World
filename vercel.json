@@ -4,6 +4,9 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "cleanUrls": true,
+  "functions": {
+    "api/npc.js": { "maxDuration": 60 }
+  },
   "rewrites": [
     { "source": "/api/admin/:path*", "destination": "/api/admin?__path=:path*" }
   ],

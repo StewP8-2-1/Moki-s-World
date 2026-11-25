@@ -20,6 +20,7 @@ import * as versions from './_admin/versions.js';
 import * as restore from './_admin/restore.js';
 import * as upload from './_admin/upload.js';
 import * as assets from './_admin/assets.js';
+import * as npcKnowledge from './_admin/npcKnowledge.js';
 
 const ROUTES = [
   ['login', login],
@@ -35,6 +36,7 @@ const ROUTES = [
   ['restore', restore],
   ['upload', upload],
   ['assets', assets],
+  ['npc-knowledge/:id', npcKnowledge],
 ];
 
 /** The admin sub-path: from the rewrite's __path query, or from the URL path when called directly. */

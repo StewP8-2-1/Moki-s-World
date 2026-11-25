@@ -84,6 +84,17 @@ export const BEHAVIORS = {
     scene.addInteractable({ target, verb: 'Open', name: promptName(label), activate });
   },
 
+  npc(scene, view, obj) {
+    const target = view.main;
+    const open = () => scene.openChat(obj, target);
+    target.setInteractive({ useHandCursor: true });
+    target.on('pointerdown', (pointer, localX, localY, event) => {
+      event.stopPropagation();
+      open();
+    });
+    scene.addInteractable({ target, verb: 'Talk', name: promptName(obj.props.name), activate: open });
+  },
+
   portal(scene, view, obj) {
     scene.physics.add.existing(view.main, true); // static body sized to the scaled image
     view.main.body.updateFromGameObject();

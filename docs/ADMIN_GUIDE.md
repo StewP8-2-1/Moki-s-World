@@ -41,6 +41,7 @@ The editor lives at **https://moki-s-world.vercel.app/admin**. Locally, it's at 
 | 📣 **Promo** | A clickable image with a title, text and a button (for example "Buy now"). It can be shown only between two dates |
 | 🔤 **Text** | A sign or heading |
 | 🌿 **Decoration** | A non-interactive image |
+| 💬 **NPC (chat)** | A character players can talk to. Write its **Persona** (who it is and how it talks; this is public, so no secrets) and list **Reference URLs** it should know about. Its live tools only work on those sites. After placing it, fill its knowledge pack (studio CLI, or `POST /api/admin/npc-knowledge/:id`) and **publish**. Players can only chat with published NPCs. See `docs/NPC.md` |
 
 New objects start with a grey placeholder image. Click **Choose image…** to replace it.
 

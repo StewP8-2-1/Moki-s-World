@@ -35,6 +35,13 @@ export function safeUrl(v, name, { required = false, allowRelative = true } = {}
   if (allowRelative && !/^[a-z][a-z0-9+.-]*:/i.test(s) && !s.startsWith('//')) return s;
   fail(`${name} must start with http:// or https://`);
 }
+/** NPC reference links: newline/space separated absolute http(s) URLs, at most 10. Stored as one string. */
+const referenceUrls = (v) => {
+  const s = str(v, 'Reference URLs', { max: 10 * 2048 + 20 });
+  const urls = s.split(/[\s,]+/).map((u) => u.trim()).filter(Boolean);
+  if (urls.length > 10) fail('At most 10 reference URLs');
+  return urls.map((u) => safeUrl(u, 'Reference URL', { allowRelative: false })).join('\n');
+};
 const date = (v, name) => {
   if (v == null || v === '') return null;
   const d = new Date(v);
@@ -85,6 +92,15 @@ export const PROP_SPECS = {
     color: color(p.color, 'Colour', '#000000'),
   }),
   decor: (p) => ({ imageUrl: safeUrl(p.imageUrl, 'Image', { required: true }) }),
+  npc: (p) => ({
+    imageUrl: safeUrl(p.imageUrl, 'Image', { required: true }),
+    name: str(p.name, 'Name', { required: true, max: 60 }),
+    greeting: str(p.greeting, 'Greeting', { max: 300 }),
+    persona: str(p.persona, 'Persona', { max: 4000 }),
+    referenceUrls: referenceUrls(p.referenceUrls),
+    liveWeb: bool(p.liveWeb, false),
+    ...label(p),
+  }),
 };
 
 export const OBJECT_TYPES = Object.keys(PROP_SPECS);
