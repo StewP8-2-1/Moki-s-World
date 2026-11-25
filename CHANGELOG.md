@@ -5,6 +5,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Changed
+- v1.0.0 is live in production at https://moki-s-world.vercel.app. PR #1 was merged and production was verified as a public visitor (19/19 browser checks).
+- GitHub Pages was switched off for the repo, so the old `github.io` address is retired.
+
+### Security
+- Revoked the Vercel *Protection Bypass for Automation* secret created for testing previews. Preview deployments stay behind Vercel Authentication.
+
 ## [1.0.0] — 2026-11-25 — Vercel + Neon rework, visual editor
 
 ### Phase checklist

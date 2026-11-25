@@ -1,6 +1,6 @@
 # Deployment
 
-> Status: ✅ deployed on Vercel. Pushes to `main` go to production. Every other branch gets a preview URL. GitHub Pages is retired.
+> Status: ✅ **v1.0.0 is live** at https://moki-s-world.vercel.app (merged in PR #1 on 2026-11-25). Pushes to `main` go to production. Every other branch gets a preview URL. GitHub Pages is switched off.
 
 ## How deploys work
 - **Production:** merge or push to `main`, and Vercel builds and deploys https://moki-s-world.vercel.app.
@@ -10,7 +10,7 @@
 ### Testing a preview deployment
 Preview URLs are behind **Vercel Authentication**; production is public. To script against a preview:
 - **API:** use `npx vercel curl <preview-url>/api/world`, which bypasses protection automatically.
-- **Browsers and scripts:** send the header `x-vercel-protection-bypass: <secret>`. The secret is the project's *Protection Bypass for Automation* secret (Settings → Deployment Protection); never commit it. Add `x-vercel-set-bypass-cookie: true` to keep the bypass for the rest of a browser session.
+- **Browsers and scripts:** send the header `x-vercel-protection-bypass: <secret>`, using a *Protection Bypass for Automation* secret (Settings → Deployment Protection). Never commit it, and add `x-vercel-set-bypass-cookie: true` to keep the bypass for the rest of a browser session. The project currently has **no** bypass secret: the one created for v1.0.0 testing was revoked afterwards. Create one when needed (`vercel curl` creates one automatically) and revoke it after testing.
 - **Timing:** right after a publish, `/api/world` on the CDN can serve the previous version for up to 60 s (`Vercel-CDN-Cache-Control`). Tests that check "live after publish" must wait or poll.
 
 ## `vercel.json`
@@ -52,8 +52,8 @@ Preview URLs are behind **Vercel Authentication**; production is public. To scri
 
 The database was seeded on 2026-11-25 with `npm run db:seed`, which published version 1 (3 scenes, 16 objects).
 
-## Retiring GitHub Pages
-The Pages workflow (`.github/workflows/deploy.yml`) was removed in Phase 6. After merging, the old Pages site stays online with its last build until Pages is switched off in the GitHub repo (**Settings → Pages → Source: None**). Do that once the Vercel site is confirmed working, and point any links at https://moki-s-world.vercel.app.
+## GitHub Pages (retired)
+The Pages workflow was removed in Phase 6. GitHub Pages was switched off for the repo on 2026-11-25, after production on Vercel was verified, so the old `stewp8-2-1.github.io/Moki-s-World/` address no longer serves the site. Point any old links at https://moki-s-world.vercel.app.
 
 ## Local development
 ```
