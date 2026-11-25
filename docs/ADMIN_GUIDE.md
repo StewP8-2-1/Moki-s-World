@@ -1,11 +1,11 @@
 # Admin guide
 
-The editor lives at **`/admin.html`** on the site. Locally, it's at `http://localhost:5173/admin.html` after `npm run dev`.
+The editor lives at **https://moki-s-world.vercel.app/admin**. Locally, it's at `http://localhost:5173/admin.html` after `npm run dev`.
 
 > Status: complete through Phase 5. Edit, upload images, preview, publish and roll back.
 
 ## Signing in
-1. Open `/admin.html` and enter the admin password.
+1. Open `/admin` and enter the admin password.
 2. You stay signed in on that browser for 7 days. **Sign out** (top right) ends the session.
 3. Changing the password in Vercel signs everyone out.
 

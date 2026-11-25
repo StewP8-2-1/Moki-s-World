@@ -1,6 +1,6 @@
 # Moki's World — agent guide
 
-Moki's World is a Phaser 4 + Vite browser world: a top-down hub that leads into side-scrolling art galleries. It is moving to **Vercel** (static site + serverless `/api`), **Neon Postgres** (world data) and **Vercel Blob** (uploaded images). It also gets a visual admin editor at `/admin.html`.
+Moki's World is a Phaser 4 + Vite browser world: a top-down hub that leads into side-scrolling art galleries. It runs on **Vercel** (static site plus serverless `/api`), with **Neon Postgres** for world data and **Vercel Blob** for uploaded images. It also has a visual admin editor at `/admin`.
 
 ## Commands
 | Command | Purpose |
@@ -12,7 +12,7 @@ Moki's World is a Phaser 4 + Vite browser world: a top-down hub that leads into 
 
 Env vars (see `docs/DEPLOYMENT.md`): `DATABASE_URL`, `ADMIN_PASSWORD`, `AUTH_SECRET`, `BLOB_READ_WRITE_TOKEN`. Never commit `.env*` files. Refresh them with `npx vercel env pull .env.local`.
 
-API handlers are Web-standard (`export const GET = handle(async (request) => Response)`). Helpers live in `api/_lib/`; the `_` prefix keeps Vercel from deploying them as functions. Every `/api/admin/*` handler must call `requireAdmin(request)`, and mutating ones must also call `requireJson(request)`.
+API handlers are Web-standard (`export const GET = handle(async (request) => Response)`). Helpers live in `api/_lib/`; the `_` prefix keeps Vercel from deploying them as functions. **Function budget:** the Hobby plan allows at most 12 functions per deployment, and only `api/world.js` and `api/admin.js` are functions. Add new admin endpoints as modules in `api/_admin/` and register them in the `ROUTES` table in `api/admin.js`. Never add new top-level files under `api/`. Every admin handler must call `requireAdmin(request)`, and mutating ones must also call `requireJson(request)`.
 
 Testing: dev builds expose `window.__game` (game) and `window.__editor` (editor) so headless browser smoke tests can inspect state.
 
@@ -20,7 +20,7 @@ Testing: dev builds expose `window.__game` (game) and `window.__editor` (editor)
 - `src/world/`: the **shared object registry** (`objectTypes.js`). The game and the editor both render objects through it. Runtime-only interactions go in `behaviors.js`.
 - `src/scenes/BootScene.js` + `WorldScene.js`: one generic data-driven scene. Do not hardcode world content in scenes.
 - `src/admin/`: the editor (Phaser `EditorScene` plus DOM panels).
-- `api/`: Vercel functions. `api/_lib/` holds db, auth and validation helpers.
+- `api/world.js` (public) and `api/admin.js` (a router for every `/api/admin/*` endpoint, using the `vercel.json` rewrite) are the only functions. `api/_admin/` holds the admin handlers, and `api/_lib/` holds the db, auth and validation helpers.
 - `db/schema.sql`: the source of truth for the schema.
 - Full details are in `docs/ARCHITECTURE.md`, `docs/DATABASE.md` and `docs/API.md`.
 

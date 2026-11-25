@@ -7,9 +7,8 @@ export default defineConfig(({ mode }) => {
   Object.assign(process.env, loadEnv(mode, process.cwd(), ''));
 
   return {
-    // GitHub Pages serves from /Moki-s-World/; Vercel and local dev serve from /.
-    // (The GitHub Pages workflow is removed in Phase 6.)
-    base: process.env.GITHUB_ACTIONS ? '/Moki-s-World/' : '/',
+    // Served from the domain root on Vercel and locally.
+    base: '/',
     plugins: [devApi()],
     build: {
       // Keep images as files (no inlining)

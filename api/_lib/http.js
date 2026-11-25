@@ -10,9 +10,9 @@ export function error(status, message) {
 
 /** Wrap a handler so thrown errors become JSON responses instead of crashes. */
 export function handle(fn) {
-  return async (request) => {
+  return async (request, ...args) => {
     try {
-      return await fn(request);
+      return await fn(request, ...args);
     } catch (err) {
       const status = err.status || 500;
       if (!err.status) console.error(err); // unexpected errors only

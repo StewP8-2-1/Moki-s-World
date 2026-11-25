@@ -2,7 +2,13 @@
 
 > Status: ✅ all endpoints are implemented (Phases 1–5).
 
-Handlers live in `api/` and use Web-standard signatures (`export const GET = (request) => Response`). Helpers live in `api/_lib/`, which Vercel does not deploy as functions. Locally, `npm run dev` serves these same files through `scripts/viteDevApi.js`.
+Handlers use Web-standard signatures (`export const GET = (request) => Response`).
+
+**Deployment layout:** only two Vercel Functions are deployed, because the Hobby plan limit is 12 per deployment.
+- `api/world.js` serves the public endpoint.
+- `api/admin.js` serves every `/api/admin/*` endpoint. `vercel.json` rewrites `/api/admin/<path>` to `/api/admin?__path=<path>`, and the router dispatches to the modules in `api/_admin/`, passing `:id` params.
+
+Folders starting with `_` (`api/_admin/`, `api/_lib/`) are never deployed or routed. Locally, `npm run dev` serves the same files through `scripts/viteDevApi.js`, which applies the same `vercel.json` rewrites.
 
 ## Public
 | Method | Path | Description |

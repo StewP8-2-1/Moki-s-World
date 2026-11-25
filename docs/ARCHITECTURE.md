@@ -63,7 +63,9 @@ The game and the editor both call `create()`, so what you see in the editor is w
 | `src/world/` | Object registry, behaviours, world loader |
 | `src/scenes/` | Boot + World scenes |
 | `src/admin/` | Admin editor |
-| `api/` | Serverless endpoints (`api/_lib/` helpers) |
+| `api/world.js`, `api/admin.js` | The only two Vercel Functions. `admin.js` routes every `/api/admin/*` request |
+| `api/_admin/`, `api/_lib/` | Admin handlers and shared helpers (not deployed as functions) |
+| `vercel.json` | Framework, clean URLs (`/admin`), the admin rewrite and security/caching headers |
 | `db/schema.sql` | Database schema |
 | `scripts/seed.js` | Seeds the DB from the legacy hardcoded world |
 

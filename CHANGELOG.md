@@ -77,6 +77,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   - A save status indicator, an "Unpublished changes" pill and toasts.
   - Changed image URLs load on demand.
 - `public/placeholder.png`: the default image for new objects.
+- `vercel.json` sets the Vite framework, clean URLs, the admin API rewrite, security headers (`nosniff`, `Referrer-Policy`, `X-Frame-Options: DENY`), `noindex` and `no-store` on `/admin`, and immutable caching of `/assets/*`.
 - Publishing and versions:
   - `POST /api/admin/publish` (with an optional note), `GET /api/admin/versions` and `POST /api/admin/restore`. Restore copies a version into the draft; nothing goes live until you publish.
   - In the editor: a **Publish** dialog with a summary and note (the button is disabled when there's nothing new), a **History** dialog with per-version Restore, and a status pill that links to the live site.
@@ -92,6 +93,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - `scripts/viteDevApi.js`: a Vite dev middleware that runs the `/api` functions locally. It follows Vercel's filesystem routing, including `[param].js`, so `npm run dev` is full-stack.
 
 ### Changed
+- The admin API runs as a single Vercel Function.
+  - `api/admin.js` routes `/api/admin/*` through the `vercel.json` rewrite (`?__path=`).
+  - The handlers moved to `api/_admin/`, and `[id]` handlers receive router params.
+  - Deployed functions: 14 → 2.
+- `scripts/viteDevApi.js` applies the `vercel.json` rewrites locally and never routes `_` folders, so dev routing matches production.
+- The editor URL is now `/admin`, via clean URLs.
 - The game is now fully data-driven, and `main.js` registers only `BootScene` and `WorldScene`. Relative asset paths resolve against the Vite base URL.
 - `constants.js` keeps only the canvas size; world sizes now come from the data.
 - Object registry defaults now use `placeholder.png` and valid example URLs, so new objects pass validation immediately.
@@ -102,9 +109,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   - It loads `.env.local` for the dev API.
 
 ### Removed
+- The GitHub Pages workflow (`.github/workflows/deploy.yml`) and the `/Moki-s-World/` base path. The site now deploys only to Vercel.
 - `HubScene.js`, `GalleryScene.js` and `ArtworkScene.js`, along with `ReqworkData.js` and `ArtworkData.js`. Their content now lives in the DB and in `src/data/fallbackWorld.json`.
 
 ### Fixed
+- Preview deployments failed at "Deploying outputs" after Phase 5. The 14 functions exceeded the Hobby plan limit of 12 per deployment. Admin endpoints are now one router function.
 - Returning visitors briefly saw the previous world after a publish. Browsers honoured `stale-while-revalidate` in `/api/world`'s `Cache-Control`. CDN caching now goes in `Vercel-CDN-Cache-Control`, and browsers always revalidate.
 - Duplicate `anims.create` warnings on every scene start.
 - The gallery scenes depended on the hub having loaded the portal texture first.

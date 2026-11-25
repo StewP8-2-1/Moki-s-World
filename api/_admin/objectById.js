@@ -1,17 +1,17 @@
-import { getSql } from '../../_lib/db.js';
-import { handle, json, readJson, HttpError } from '../../_lib/http.js';
-import { requireAdmin, requireJson } from '../../_lib/auth.js';
-import { validateObject } from '../../_lib/validate.js';
-import { assertUuid, lastSegment, sceneIdSet, touchDraft, toObject } from '../../_lib/draft.js';
+import { getSql } from '../_lib/db.js';
+import { handle, json, readJson, HttpError } from '../_lib/http.js';
+import { requireAdmin, requireJson } from '../_lib/auth.js';
+import { validateObject } from '../_lib/validate.js';
+import { assertUuid, lastSegment, sceneIdSet, touchDraft, toObject } from '../_lib/draft.js';
 
 /**
  * PATCH /api/admin/objects/:id  — partial update. Fields are merged over the stored object
  * (props are merged key-by-key) and the result is fully re-validated.
  */
-export const PATCH = handle(async (request) => {
+export const PATCH = handle(async (request, params = {}) => {
   await requireAdmin(request);
   requireJson(request);
-  const id = assertUuid(lastSegment(request));
+  const id = assertUuid(params.id ?? lastSegment(request));
   const patch = await readJson(request);
   const sql = getSql();
 
@@ -31,9 +31,9 @@ export const PATCH = handle(async (request) => {
 });
 
 /** DELETE /api/admin/objects/:id */
-export const DELETE = handle(async (request) => {
+export const DELETE = handle(async (request, params = {}) => {
   await requireAdmin(request);
-  const id = assertUuid(lastSegment(request));
+  const id = assertUuid(params.id ?? lastSegment(request));
   const sql = getSql();
   const [rows] = await sql.transaction([
     sql`DELETE FROM objects WHERE id = ${id} RETURNING id`,

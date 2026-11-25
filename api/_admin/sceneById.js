@@ -1,16 +1,16 @@
-import { getSql } from '../../_lib/db.js';
-import { handle, json, readJson, HttpError } from '../../_lib/http.js';
-import { requireAdmin, requireJson } from '../../_lib/auth.js';
-import { validateScene } from '../../_lib/validate.js';
-import { lastSegment, touchDraft, toScene } from '../../_lib/draft.js';
+import { getSql } from '../_lib/db.js';
+import { handle, json, readJson, HttpError } from '../_lib/http.js';
+import { requireAdmin, requireJson } from '../_lib/auth.js';
+import { validateScene } from '../_lib/validate.js';
+import { lastSegment, touchDraft, toScene } from '../_lib/draft.js';
 
 const START_SCENE = 'hub';
 
 /** PUT /api/admin/scenes/:id — update settings (the id itself is immutable). Partial bodies are merged. */
-export const PUT = handle(async (request) => {
+export const PUT = handle(async (request, params = {}) => {
   await requireAdmin(request);
   requireJson(request);
-  const id = lastSegment(request);
+  const id = params.id ?? lastSegment(request);
   const patch = await readJson(request);
   const sql = getSql();
   const [existing] = await sql`SELECT * FROM scenes WHERE id = ${id}`;
@@ -29,9 +29,9 @@ export const PUT = handle(async (request) => {
 });
 
 /** DELETE /api/admin/scenes/:id — refused for the start scene or while portals lead to it. */
-export const DELETE = handle(async (request) => {
+export const DELETE = handle(async (request, params = {}) => {
   await requireAdmin(request);
-  const id = lastSegment(request);
+  const id = params.id ?? lastSegment(request);
   if (id === START_SCENE) throw new HttpError(400, 'The hub is the start scene and cannot be deleted');
   const sql = getSql();
   const portals = await sql`
