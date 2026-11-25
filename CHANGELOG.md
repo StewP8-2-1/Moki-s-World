@@ -8,7 +8,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ### Phase checklist
 - [x] Phase 0: Development process and documentation scaffold
 - [x] Phase 1: Backend foundation (schema, `/api/world`, seed). Live Neon DB seeded, version 1 published.
-- [ ] Phase 2: Data-driven game (object registry, WorldScene)
+- [x] Phase 2: Data-driven game (object registry, WorldScene)
 - [ ] Phase 3: Admin shell (login, read-only scene view)
 - [ ] Phase 4: Visual editing (drag, inspector, palette, undo)
 - [ ] Phase 5: Media uploads and publishing (Blob, versions)
@@ -36,6 +36,27 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   - `ADMIN_PASSWORD` is set on Vercel as a sensitive variable.
   - `AUTH_SECRET` is set on Vercel.
   - The setup is recorded in `docs/DEPLOYMENT.md`.
+
+- The shared object registry in `src/world/objectTypes.js` covers painting, link, portal, promo, text and decor. For each type it holds defaults, inspector fields, `create()` and `layout()`.
+- `src/world/behaviors.js` holds the game-only interactions:
+  - painting/promo dialogue, with pan-on-click
+  - links open safely, and only http(s) URLs are followed
+  - portals use physics overlap
+- `src/world/loadWorld.js` fetches `/api/world` with a 5 s timeout. If that fails it falls back to the bundled world. It also supports `?draft=1` and time-boxed promos (`isActive`).
+- `BootScene` loads the sprites, the world data and every referenced image, and creates the walk animations once.
+- `WorldScene` is one generic scene built from data. Its `mode` picks a controller (topdown or platformer). Portal travel fades out and back in.
+- `DialogueUI` has an optional call-to-action button for promos.
+
+### Changed
+- The game is now fully data-driven, and `main.js` registers only `BootScene` and `WorldScene`. Relative asset paths resolve against the Vite base URL.
+- `constants.js` keeps only the canvas size; world sizes now come from the data.
+
+### Removed
+- `HubScene.js`, `GalleryScene.js` and `ArtworkScene.js`, along with `ReqworkData.js` and `ArtworkData.js`. Their content now lives in the DB and in `src/data/fallbackWorld.json`.
+
+### Fixed
+- Duplicate `anims.create` warnings on every scene start.
+- The gallery scenes depended on the hub having loaded the portal texture first.
 
 ### Security
 - Removed the GitHub personal access token that was embedded in the local git remote URL. Pushes now go through Git Credential Manager.

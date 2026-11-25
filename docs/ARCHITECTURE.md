@@ -1,6 +1,16 @@
 # Architecture
 
-> Status: **target design** for the Vercel + Neon rework. Sections are marked as they land.
+> Status: Phases 1–2 are implemented: the API, the DB and the data-driven game. The admin editor (Phases 3–5) is still planned.
+
+## Adding a new object type
+1. `src/world/objectTypes.js`: add `label`, `icon`, `defaults`, `fields` and `create`.
+2. `api/lib/validate.js`: add a matching `PROP_SPECS` entry.
+3. Optionally, add a runtime interaction in `src/world/behaviors.js`.
+4. `db/schema.sql`: add the type to the `objects.type` CHECK constraint.
+
+## Debugging
+- In dev builds, `window.__game` exposes the Phaser game instance. For example, `__game.scene.getScene('World').travelTo('artwork')`.
+- The console logs `[world] using bundled fallback (...)` when `/api/world` can't be reached. This is expected under plain `npm run dev`.
 
 ## Overview
 ```
