@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import { TopDownController, PlatformerController } from '../GameControllers';
-import { DialogueUI } from '../DialogueUI';
 import { createObjectView } from '../world/objectTypes.js';
 import { attachBehavior } from '../world/behaviors.js';
 import { isActive, textureKey } from '../world/loadWorld.js';
@@ -73,13 +72,11 @@ export class WorldScene extends Phaser.Scene {
     // Camera follows the player
     this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
 
-    // UI: dialogue + controls + menu
-    this.dialogueUI = new DialogueUI(this, {
-      width: this.cameras.main.width + 10, height: 140, paddingTop: 20, titleSpacing: 0, bottomMargin: 140,
-    });
+    // Controls, then the screen-space HUD (dialogue, touch buttons, menu) on top.
+    // launch() restarts the HUD when this scene restarts, so it always matches the current mode.
     this.controls = mode.createController(this, this.player);
-    this.controls.registerDialogueBox(this.dialogueUI.container);
-    this.controls.createBurgerMenu();
+    this.hud = this.scene.get('Hud');
+    this.scene.launch('Hud', { world: this, mode: s.mode, controls: this.controls });
 
     // World objects from data
     this.objectViews = [];
@@ -95,7 +92,7 @@ export class WorldScene extends Phaser.Scene {
     this.input.on('pointerdown', () => {
       if (!this.isDialogueLocked) return;
       this.isDialogueLocked = false;
-      this.dialogueUI.hide();
+      this.hideDialogue();
       this.cameras.main.pan(this.player.x, this.player.y, 1000, 'Power2', false, (camera, progress) => {
         if (progress === 1) camera.startFollow(this.player, true, 0.1, 0.1);
       });
@@ -106,6 +103,15 @@ export class WorldScene extends Phaser.Scene {
 
   update() {
     this.controls.update();
+  }
+
+  /** Dialogue lives in the HUD scene, which starts one tick after this one (launch is queued). */
+  showDialogue(data) {
+    this.hud.dialogue?.show(data);
+  }
+
+  hideDialogue() {
+    this.hud.dialogue?.hide();
   }
 
   /** Called by portal behaviours. */

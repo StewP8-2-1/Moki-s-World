@@ -26,16 +26,10 @@ export class DialogueUI {
     const screenX = cam.width / 2;
     const screenY = cam.height - this.bottomMargin;
 
+    // Lives in HudScene, whose camera never scrolls or zooms, so no scroll-factor tricks are needed
     this.container = this.scene.add.container(screenX, screenY)
       .setDepth(100)
-      .setScrollFactor(0) 
       .setVisible(false);
-
-    // Keep it on the UI camera
-    const uiCam = this.scene.cameras.getCamera('UI_CAM');
-    if (uiCam) {
-        this.scene.cameras.main.ignore(this.container);
-    }
 
     // UPDATED: Origin (0.5, 1) means the rectangle grows UPWARDS from the bottom
     const bg = this.scene.add.rectangle(0, 0, this.boxWidth, this.boxHeight, 0x000000, 0.85).setOrigin(0.5, 1);

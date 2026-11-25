@@ -53,15 +53,16 @@ The game and the editor both call `create()`, so what you see in the editor is w
 - `WorldScene({ sceneId })` builds one scene from the data. Its `mode` picks the controller from `src/GameControllers.js`:
   - `topdown` → `TopDownController`
   - `platformer` → `PlatformerController`
+- `WorldScene` launches `HudScene` on top of itself, and launches it again on every scene change. The HUD holds the screen-space UI: the dialogue box (`src/DialogueUI.js`), the touch buttons and the ☰ menu. Its camera never scrolls or zooms, and Phaser's `globalTopOnly` input means a tap on a HUD button never reaches the world. World code talks to the HUD through `WorldScene.showDialogue()` / `hideDialogue()`.
 
 ## File map
 | Path | Role |
 |---|---|
 | `src/main.js` | Phaser game config |
-| `src/GameControllers.js` | Player controllers, zoom/pan, D-pad, menu |
-| `src/DialogueUI.js` | Bottom dialogue box |
+| `src/GameControllers.js` | Player controllers and zoom/pan |
+| `src/DialogueUI.js` | Dialogue box (rendered in the HUD) |
 | `src/world/` | Object registry, behaviours, world loader |
-| `src/scenes/` | Boot + World scenes |
+| `src/scenes/` | Boot, World and HUD scenes |
 | `src/admin/` | Admin editor |
 | `api/world.js`, `api/admin.js` | The only two Vercel Functions. `admin.js` routes every `/api/admin/*` request |
 | `api/_admin/`, `api/_lib/` | Admin handlers and shared helpers (not deployed as functions) |

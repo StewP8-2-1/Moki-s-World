@@ -8,22 +8,11 @@ class BaseController {
   constructor(scene, player) {
     this.scene = scene;
     this.player = player;
-    
-    this.dpadElements = [];
-    // Array to hold ALL UI elements so we can adjust their scale/position on zoom
-    this.uiElements = []; 
-    
+
     // Track if camera is currently following the player
-    this.isCameraFollowing = true; 
-    
-    // Check if a preference already exists globally. If not, default to true.
-    let savedState = this.scene.registry.get('dpadEnabled');
-    if (savedState === undefined) {
-      savedState = true;
-      this.scene.registry.set('dpadEnabled', true);
-    }
-    this.isDpadEnabled = savedState; 
-    
+    this.isCameraFollowing = true;
+
+    // Written by the HUD's on-screen touch buttons (src/scenes/HudScene.js)
     this.mobileControls = { up: false, down: false, left: false, right: false, jump: false };
 
     this.cursors = this.scene.input.keyboard.createCursorKeys();
@@ -35,23 +24,8 @@ class BaseController {
       space: Phaser.Input.Keyboard.KeyCodes.SPACE
     });
 
-    this.scene.input.addPointer(2); 
-
     // Setup camera zoom and drag controls
     this.setupCameraControls();
-  }
-
-  // ==========================================
-  // NEW: REGISTER EXTERNAL UI (DIALOGUE BOX)
-  // Call this from your Scene after creating the DialogueUI
-  // ==========================================
-  registerDialogueBox(dialogueContainer) {
-    // Save the original screen coordinates so the counter-zoom math knows where it started
-    dialogueContainer.origX = dialogueContainer.x;
-    dialogueContainer.origY = dialogueContainer.y;
-    
-    // Push it into the master array so updateUI(zoom) handles it automatically
-    this.uiElements.push(dialogueContainer);
   }
 
   // ==========================================
@@ -75,7 +49,6 @@ class BaseController {
     this.scene.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
       let newZoom = Phaser.Math.Clamp(cam.zoom - (deltaY * zoomSpeedWheel), minZoom, maxZoom);
       cam.setZoom(newZoom);
-      this.updateUI(newZoom);
       
       // If zoomed all the way out, snap camera back to player
       if (newZoom <= minZoom) this.resumeCameraFollow();
@@ -115,7 +88,6 @@ class BaseController {
           let newZoom = Phaser.Math.Clamp(cam.zoom + (distanceDelta * zoomSpeedPinch), minZoom, maxZoom);
           
           cam.setZoom(newZoom);
-          this.updateUI(newZoom);
 
           if (newZoom <= minZoom) this.resumeCameraFollow();
         }
@@ -141,21 +113,6 @@ class BaseController {
     });
   }
 
-  // Counter-scales and repositions UI so it doesn't leave the screen during zoom
-  updateUI(zoom) {
-    const cam = this.scene.cameras.main;
-    const cx = cam.centerX; // Center X of the screen
-    const cy = cam.centerY; // Center Y of the screen
-
-    this.uiElements.forEach(el => {
-      // Counter-scale the UI element
-      el.setScale(1 / zoom);
-      // Counter-shift position relative to the screen center
-      el.x = cx + (el.origX - cx) / zoom;
-      el.y = cy + (el.origY - cy) / zoom;
-    });
-  }
-
   // Call this to re-engage camera tracking on the player smoothly
   resumeCameraFollow() {
     if (!this.isCameraFollowing) {
@@ -163,83 +120,6 @@ class BaseController {
       this.scene.cameras.main.startFollow(this.player, true, 0.1, 0.1);
       this.isCameraFollowing = true;
     }
-  }
-
-  createMobileBtn(x, y, label, key, btnWidth = 60, btnHeight = 60) {
-    const btn = this.scene.add.rectangle(x, y, btnWidth, btnHeight, 0x000000, 0.3)
-      .setScrollFactor(0).setDepth(100).setVisible(this.isDpadEnabled); 
-
-    if (this.isDpadEnabled) btn.setInteractive();
-
-    const txt = this.scene.add.text(x, y, label, { fontSize: '20px', fill: '#ffffff', fontStyle: 'bold' })
-      .setOrigin(0.5).setScrollFactor(0).setDepth(101).setVisible(this.isDpadEnabled); 
-
-    // Save original positions for the zoom math
-    btn.origX = x; btn.origY = y;
-    txt.origX = x; txt.origY = y;
-
-    this.dpadElements.push(btn, txt);
-    this.uiElements.push(btn, txt); // Add to master UI array
-
-    btn.on('pointerdown', () => { this.mobileControls[key] = true; btn.setFillStyle(0x000000, 0.6); });
-    btn.on('pointerup', () => { this.mobileControls[key] = false; btn.setFillStyle(0x000000, 0.3); });
-    btn.on('pointerout', () => { this.mobileControls[key] = false; btn.setFillStyle(0x000000, 0.3); });
-  }
-
-  toggleDpad(isVisible) {
-    this.isDpadEnabled = isVisible;
-    this.scene.registry.set('dpadEnabled', isVisible); 
-    
-    this.dpadElements.forEach(el => {
-      el.setVisible(isVisible);
-      if (isVisible && el.type === 'Rectangle') {
-        el.setInteractive();
-      } else if (!isVisible && el.type === 'Rectangle') {
-        el.disableInteractive();
-        Object.keys(this.mobileControls).forEach(k => this.mobileControls[k] = false);
-      }
-    });
-  }
-
-  createBurgerMenu() {
-    const { width } = this.scene.cameras.main;
-    const topCenterX = width / 2;
-
-    const burgerBg = this.scene.add.rectangle(topCenterX, 25, 50, 50, 0x000000, 0.5)
-      .setScrollFactor(0).setDepth(200).setInteractive();
-    const burgerIcon = this.scene.add.text(topCenterX, 25, '☰', { fontSize: '32px', fill: '#ffffff' })
-      .setOrigin(0.5).setScrollFactor(0).setDepth(201);
-
-    const menuBg = this.scene.add.rectangle(topCenterX, 110, 180, 50, 0x000000, 0.8)
-      .setScrollFactor(0).setDepth(200).setVisible(false).setInteractive();
-
-    const initialText = this.isDpadEnabled ? 'Hide D-Pad' : 'Show D-Pad';
-    const menuText = this.scene.add.text(topCenterX, 110, initialText, { fontSize: '20px', fill: '#ffffff' })
-      .setOrigin(0.5).setScrollFactor(0).setDepth(201).setVisible(false);
-
-    // Save original positions for the zoom math
-    burgerBg.origX = topCenterX; burgerBg.origY = 25;
-    burgerIcon.origX = topCenterX; burgerIcon.origY = 25;
-    menuBg.origX = topCenterX; menuBg.origY = 110;
-    menuText.origX = topCenterX; menuText.origY = 110;
-    
-    this.uiElements.push(burgerBg, burgerIcon, menuBg, menuText); // Add to master UI array
-
-    let isMenuOpen = false;
-
-    burgerBg.on('pointerdown', () => {
-      isMenuOpen = !isMenuOpen;
-      menuBg.setVisible(isMenuOpen);
-      menuText.setVisible(isMenuOpen);
-    });
-
-    menuBg.on('pointerdown', () => {
-      this.toggleDpad(!this.isDpadEnabled); 
-      menuText.setText(this.isDpadEnabled ? 'Hide D-Pad' : 'Show D-Pad'); 
-      isMenuOpen = false;
-      menuBg.setVisible(false);
-      menuText.setVisible(false);
-    });
   }
 }
 
@@ -250,12 +130,6 @@ export class TopDownController extends BaseController {
   constructor(scene, player, speed = 300) {
     super(scene, player); // Calls the BaseController setup
     this.speed = speed;
-    
-    const { height } = this.scene.cameras.main;
-    this.createMobileBtn(120, height - 160, 'W', 'up');
-    this.createMobileBtn(120, height - 60, 'S', 'down');
-    this.createMobileBtn(50, height - 110, 'A', 'left');
-    this.createMobileBtn(190, height - 110, 'D', 'right');
   }
 
   update() {
@@ -294,11 +168,6 @@ export class PlatformerController extends BaseController {
     super(scene, player); // Calls the BaseController setup
     this.speed = speed;
     this.jumpPower = jumpPower;
-
-    const { width, height } = this.scene.cameras.main;
-    this.createMobileBtn(70, height - 70, 'A', 'left', 60, 60);
-    this.createMobileBtn(150, height - 70, 'D', 'right', 60, 60);
-    this.createMobileBtn(width - 90, height - 70, 'JUMP', 'jump', 100, 60);
   }
 
   update() {

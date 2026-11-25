@@ -5,7 +5,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Fixed
+- The dialogue box's call-to-action button could be clicked only near its original position. Once the camera scrolled, its hit area drifted away from where it was drawn (Phaser containers don't pass their scroll factor to their children).
+- Every portal trip added two more input pointers to the game (`addPointer(2)` ran in each scene restart). The pointer count is now set once in the game config.
+
 ### Changed
+- The dialogue box, touch buttons and ☰ menu moved into a new screen-space `HudScene` that runs above `WorldScene`. Zooming the world no longer needs counter-zoom maths on the UI, and taps on HUD buttons never reach the world.
+- Touch buttons are multitouch-safe and are released when the tab loses focus.
+- Touch controls default to on only for touch devices, and the on/off choice is remembered across visits. The ☰ menu closes when you tap outside it.
 - v1.0.0 is live in production at https://moki-s-world.vercel.app. PR #1 was merged and production was verified as a public visitor (19/19 browser checks).
 - GitHub Pages was switched off for the repo, so the old `github.io` address is retired.
 

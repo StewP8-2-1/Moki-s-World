@@ -13,12 +13,12 @@ function openUrl(url, newTab = true) {
 function attachDialogue(scene, view, data, { pan }) {
   const target = view.main;
   target.setInteractive({ useHandCursor: true });
-  target.on('pointerover', () => { if (!scene.isDialogueLocked) scene.dialogueUI.show(data); });
-  target.on('pointerout', () => { if (!scene.isDialogueLocked) scene.dialogueUI.hide(); });
+  target.on('pointerover', () => { if (!scene.isDialogueLocked) scene.showDialogue(data); });
+  target.on('pointerout', () => { if (!scene.isDialogueLocked) scene.hideDialogue(); });
   target.on('pointerdown', (pointer, localX, localY, event) => {
     event.stopPropagation();
     scene.isDialogueLocked = true;
-    scene.dialogueUI.show(data);
+    scene.showDialogue(data);
     if (pan) {
       scene.cameras.main.stopFollow();
       scene.cameras.main.pan(target.x, target.y + 70, 500, 'Power2');
