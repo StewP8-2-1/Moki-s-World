@@ -11,8 +11,8 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { legacyWorld } from './legacyWorld.js';
-import { buildSnapshot } from '../api/lib/world.js';
-import { validateScene, validateObject } from '../api/lib/validate.js';
+import { buildSnapshot } from '../api/_lib/world.js';
+import { validateScene, validateObject } from '../api/_lib/validate.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = new Set(process.argv.slice(2));
@@ -40,7 +40,7 @@ if (dryRun) {
   process.exit(0);
 }
 
-const { getSql } = await import('../api/lib/db.js');
+const { getSql } = await import('../api/_lib/db.js');
 const sql = getSql();
 
 const schema = await readFile(path.join(root, 'db/schema.sql'), 'utf8');

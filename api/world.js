@@ -1,5 +1,5 @@
-import { getSql } from './lib/db.js';
-import { handle, json, error } from './lib/http.js';
+import { getSql } from './_lib/db.js';
+import { handle, json, error } from './_lib/http.js';
 
 /**
  * GET /api/world — the latest published world snapshot (public, CDN-cached).

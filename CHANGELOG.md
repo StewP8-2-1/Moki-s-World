@@ -9,7 +9,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - [x] Phase 0: Development process and documentation scaffold
 - [x] Phase 1: Backend foundation (schema, `/api/world`, seed). Live Neon DB seeded, version 1 published.
 - [x] Phase 2: Data-driven game (object registry, WorldScene)
-- [ ] Phase 3: Admin shell (login, read-only scene view)
+- [x] Phase 3: Admin shell (login, read-only scene view)
 - [ ] Phase 4: Visual editing (drag, inspector, palette, undo)
 - [ ] Phase 5: Media uploads and publishing (Blob, versions)
 - [ ] Phase 6: Deploy to Vercel
@@ -19,9 +19,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - `CHANGELOG.md` (this file).
 - `docs/` pages: `ARCHITECTURE.md`, `DATABASE.md`, `API.md`, `ADMIN_GUIDE.md` and `DEPLOYMENT.md`.
 - Neon schema in `db/schema.sql` with four tables: `scenes`, `objects`, `world_versions` and `assets`.
-- `api/lib/db.js` (lazy Neon client), `api/lib/http.js` (JSON and error helpers) and `api/lib/world.js` (snapshot builder).
+- `api/_lib/db.js` (lazy Neon client), `api/_lib/http.js` (JSON and error helpers) and `api/_lib/world.js` (snapshot builder).
 - Dependencies: `@neondatabase/serverless`, `@vercel/blob` and `jose`.
-- `api/lib/validate.js`: validation for scenes and objects, shared by the API and the seed.
+- `api/_lib/validate.js`: validation for scenes and objects, shared by the API and the seed.
   - It rejects non-http(s) link URLs and portals to missing scenes.
   - It strips any props a type doesn't define.
 - `GET /api/world` returns the latest published snapshot, cached at the CDN.
@@ -46,10 +46,29 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - `BootScene` loads the sprites, the world data and every referenced image, and creates the walk animations once.
 - `WorldScene` is one generic scene built from data. Its `mode` picks a controller (topdown or platformer). Portal travel fades out and back in.
 - `DialogueUI` has an optional call-to-action button for promos.
+- Admin auth in `api/_lib/auth.js`:
+  - single-password login with a constant-time check
+  - an HS256 JWT session cookie (`HttpOnly`, `SameSite=Strict`, 7 days) that carries a password fingerprint, so changing the password logs everyone out
+  - `requireAdmin` and `requireJson` guards
+- Admin endpoints: `POST /api/admin/login`, `POST /api/admin/logout`, `GET /api/admin/me` and `GET /api/admin/draft` (returns the draft world plus the latest published version).
+- The admin editor shell at `/admin.html` (`src/admin/`):
+  - Login screen.
+  - Top bar with a scene picker, zoom controls and the live-version status.
+  - Scene info panel and an objects (layers) list.
+  - A Phaser map canvas that renders the draft with the shared object registry. It adds a grid, scene bounds, the ground and a player-start marker, and supports wheel zoom toward the cursor, drag-to-pan and fit (F).
+  - Click-to-select, synced between the map and the list.
+  - A read-only inspector generated from each type's field schema.
+  - Remembers the last scene, and adapts to narrow screens.
+- `scripts/viteDevApi.js`: a Vite dev middleware that runs the `/api` functions locally. It follows Vercel's filesystem routing, including `[param].js`, so `npm run dev` is full-stack.
 
 ### Changed
 - The game is now fully data-driven, and `main.js` registers only `BootScene` and `WorldScene`. Relative asset paths resolve against the Vite base URL.
 - `constants.js` keeps only the canvas size; world sizes now come from the data.
+- `api/lib` was renamed to `api/_lib`, so Vercel doesn't deploy the helpers as public functions.
+- `vite.config.js`:
+  - It builds `index.html` and `admin.html` as a multi-page app.
+  - `base` is `/`, except under GitHub Actions, which keeps the GitHub Pages deploy working until Phase 6.
+  - It loads `.env.local` for the dev API.
 
 ### Removed
 - `HubScene.js`, `GalleryScene.js` and `ArtworkScene.js`, along with `ReqworkData.js` and `ArtworkData.js`. Their content now lives in the DB and in `src/data/fallbackWorld.json`.

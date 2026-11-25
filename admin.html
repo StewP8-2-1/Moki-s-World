@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Moki's World · Editor</title>
+    <link rel="stylesheet" href="./src/admin/admin.css" />
+  </head>
+  <body>
+    <!-- Login -->
+    <section id="login-view" class="login" hidden>
+      <form id="login-form" class="login-card">
+        <h1>Moki's World</h1>
+        <p class="muted">Sign in to edit the world.</p>
+        <label for="password">Admin password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required autofocus />
+        <p id="login-error" class="error" role="alert"></p>
+        <button type="submit" class="btn primary">Sign in</button>
+      </form>
+    </section>
+
+    <!-- Editor -->
+    <section id="editor-view" class="editor" hidden>
+      <header class="topbar">
+        <div class="brand">Moki's World <span class="muted">Editor</span></div>
+        <label class="scene-picker">
+          <span class="sr-only">Scene</span>
+          <select id="scene-select"></select>
+        </label>
+        <div class="zoom-group" role="group" aria-label="Zoom">
+          <button class="btn icon" id="zoom-out" title="Zoom out">−</button>
+          <button class="btn" id="zoom-fit" title="Fit scene to screen (F)"><span id="zoom-label">100%</span></button>
+          <button class="btn icon" id="zoom-in" title="Zoom in">+</button>
+        </div>
+        <div class="spacer"></div>
+        <span id="status" class="pill"></span>
+        <a class="btn" href="/" target="_blank" rel="noopener">View site ↗</a>
+        <button class="btn" id="logout">Sign out</button>
+      </header>
+
+      <aside class="panel left">
+        <section>
+          <h2>Scene</h2>
+          <dl id="scene-info" class="info"></dl>
+        </section>
+        <section class="grow">
+          <h2>Objects <span id="object-count" class="muted"></span></h2>
+          <ul id="layers" class="layers"></ul>
+        </section>
+      </aside>
+
+      <main class="canvas-wrap">
+        <div id="editor-canvas"></div>
+        <div class="hint">Scroll to zoom · drag empty space to pan · click an object to inspect it</div>
+      </main>
+
+      <aside class="panel right">
+        <section class="grow">
+          <h2 id="inspector-title">Inspector</h2>
+          <div id="inspector"><p class="muted">Select an object on the map or in the list.</p></div>
+        </section>
+      </aside>
+    </section>
+
+    <script type="module" src="./src/admin/main.js"></script>
+  </body>
+</html>

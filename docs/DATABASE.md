@@ -1,6 +1,6 @@
 # Database (Neon Postgres)
 
-> Status: ✅ the schema is implemented in `db/schema.sql`, which is the source of truth and safe to re-run. The snapshot builder is `api/lib/world.js`.
+> Status: ✅ the schema is implemented in `db/schema.sql`, which is the source of truth and safe to re-run. The snapshot builder is `api/_lib/world.js`.
 
 ## Tables
 ### `scenes` (draft)

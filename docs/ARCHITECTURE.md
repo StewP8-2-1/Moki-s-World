@@ -1,10 +1,22 @@
 # Architecture
 
-> Status: Phases 1–2 are implemented: the API, the DB and the data-driven game. The admin editor (Phases 3–5) is still planned.
+> Status: Phases 1–3 are implemented: the API, the DB, the data-driven game, admin auth and the read-only editor. Editing and publishing (Phases 4–5) are still planned.
+
+## Editor (`src/admin/`)
+| File | Role |
+|---|---|
+| `admin.html` | The page shell: login, top bar, side panels and the canvas host |
+| `main.js` | Editor state (`world`, `sceneId`, `selectedId`), DOM panels, the Phaser game (RESIZE mode) and keyboard shortcuts |
+| `EditorScene.js` | Renders one scene with `createObjectView` plus overlays (grid, bounds, ground, player start, selection). Handles zoom and pan, and reports selection through `onSelect` |
+| `inspector.js` | Builds the inspector form from `OBJECT_TYPES[type].fields`, plus `objectName()` |
+| `api.js` | Fetch wrapper for `/api/admin/*` |
+| `admin.css` | Styles, with light/dark and narrow-screen layouts |
+
+The DOM side owns the state. The canvas reports selection changes through callbacks, and the DOM side calls methods on the scene (`select`, `fit`, `zoomBy`). Switching scenes restarts `EditorScene` with new init data; textures stay cached across scenes.
 
 ## Adding a new object type
 1. `src/world/objectTypes.js`: add `label`, `icon`, `defaults`, `fields` and `create`.
-2. `api/lib/validate.js`: add a matching `PROP_SPECS` entry.
+2. `api/_lib/validate.js`: add a matching `PROP_SPECS` entry.
 3. Optionally, add a runtime interaction in `src/world/behaviors.js`.
 4. `db/schema.sql`: add the type to the `objects.type` CHECK constraint.
 
@@ -49,6 +61,6 @@ The game and the editor both call `create()`, so what you see in the editor is w
 | `src/world/` | Object registry, behaviours, world loader |
 | `src/scenes/` | Boot + World scenes |
 | `src/admin/` | Admin editor |
-| `api/` | Serverless endpoints (`api/lib/` helpers) |
+| `api/` | Serverless endpoints (`api/_lib/` helpers) |
 | `db/schema.sql` | Database schema |
 | `scripts/seed.js` | Seeds the DB from the legacy hardcoded world |

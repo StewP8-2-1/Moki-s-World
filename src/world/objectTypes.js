@@ -6,7 +6,7 @@
  *   label        human name (editor palette)
  *   icon         emoji for the editor palette / layers list
  *   defaults     initial { size, depth, props } for new objects
- *   fields       inspector form schema (keep in sync with api/lib/validate.js PROP_SPECS)
+ *   fields       inspector form schema (keep in sync with api/_lib/validate.js PROP_SPECS)
  *   create(scene, obj) -> view { main, label? }   builds the Phaser objects
  * layout(view, obj) re-positions an existing view after x/y/size/props change (editor drag).
  * Runtime interactions (dialogue, links, portals) live in behaviors.js, not here.

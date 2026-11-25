@@ -5,24 +5,28 @@ Moki's World is a Phaser 4 + Vite browser world: a top-down hub that leads into 
 ## Commands
 | Command | Purpose |
 |---|---|
-| `npm run dev` | Vite dev server (game only; API calls fall back to bundled JSON) |
-| `npx vercel dev` | Full stack locally (Vite + `/api` functions); needs `.env.local` |
+| `npm run dev` | **Full stack**: Vite plus the `/api` functions (via `scripts/viteDevApi.js`) using `.env.local`. Game at `/`, editor at `/admin.html` |
+| `npx vercel dev` | The same stack through the real Vercel runtime (optional) |
 | `npm run build` | Production build. **It must pass before every commit** |
 | `npm run db:seed` | Create the schema and seed the world from the legacy data (`-- --dry-run` prints the SQL/JSON only) |
 
-Env vars (see `docs/DEPLOYMENT.md`): `DATABASE_URL`, `ADMIN_PASSWORD`, `AUTH_SECRET`, `BLOB_READ_WRITE_TOKEN`. Never commit `.env*` files.
+Env vars (see `docs/DEPLOYMENT.md`): `DATABASE_URL`, `ADMIN_PASSWORD`, `AUTH_SECRET`, `BLOB_READ_WRITE_TOKEN`. Never commit `.env*` files. Refresh them with `npx vercel env pull .env.local`.
+
+API handlers are Web-standard (`export const GET = handle(async (request) => Response)`). Helpers live in `api/_lib/`; the `_` prefix keeps Vercel from deploying them as functions. Every `/api/admin/*` handler must call `requireAdmin(request)`, and mutating ones must also call `requireJson(request)`.
+
+Testing: dev builds expose `window.__game` (game) and `window.__editor` (editor) so headless browser smoke tests can inspect state.
 
 ## Architecture (target)
 - `src/world/`: the **shared object registry** (`objectTypes.js`). The game and the editor both render objects through it. Runtime-only interactions go in `behaviors.js`.
 - `src/scenes/BootScene.js` + `WorldScene.js`: one generic data-driven scene. Do not hardcode world content in scenes.
 - `src/admin/`: the editor (Phaser `EditorScene` plus DOM panels).
-- `api/`: Vercel functions. `api/lib/` holds db, auth and validation helpers.
+- `api/`: Vercel functions. `api/_lib/` holds db, auth and validation helpers.
 - `db/schema.sql`: the source of truth for the schema.
 - Full details are in `docs/ARCHITECTURE.md`, `docs/DATABASE.md` and `docs/API.md`.
 
 ## Conventions
 - Plain ESM JavaScript, with no TypeScript and no UI framework (the admin uses vanilla DOM).
-- New object types go in the registry: defaults, inspector fields, `create()`, and optionally a behaviour. Add validation in `api/lib/validate.js` too.
+- New object types go in the registry: defaults, inspector fields, `create()`, and optionally a behaviour. Add validation in `api/_lib/validate.js` too.
 - Public URLs in data must be `http(s)` or relative paths.
 
 ## Development workflow (required)
