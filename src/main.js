@@ -22,7 +22,8 @@ const config = {
 
   // Mouse + 3 touch pointers (pinch-zoom while holding a button). Set once here: calling
   // input.addPointer() from a scene added more pointers on every scene restart.
-  input: { activePointers: 3 },
+  // Gamepads are read by InputState (src/GameControllers.js).
+  input: { activePointers: 3, gamepad: true },
 
   physics: {
     default: 'arcade',

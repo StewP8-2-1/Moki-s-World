@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { TopDownController, PlatformerController } from '../GameControllers';
+import { TopDownController, PlatformerController, InputState, CameraDirector } from '../GameControllers';
 import { createObjectView } from '../world/objectTypes.js';
 import { attachBehavior } from '../world/behaviors.js';
 import { isActive, textureKey } from '../world/loadWorld.js';
@@ -13,7 +13,7 @@ const MODES = {
       p.setScale(0.25).setSize(180, 200).setOffset(150, 150);
       return p;
     },
-    createController: (scene, player) => new TopDownController(scene, player, 300),
+    createController: (scene, player, input) => new TopDownController(scene, player, input, 300),
   },
   platformer: {
     gravity: 600,
@@ -22,7 +22,7 @@ const MODES = {
       p.setScale(0.25).setSize(200, 190);
       return p;
     },
-    createController: (scene, player) => new PlatformerController(scene, player, 200, 400),
+    createController: (scene, player, input) => new PlatformerController(scene, player, input, 200, 400),
   },
 };
 
@@ -69,14 +69,17 @@ export class WorldScene extends Phaser.Scene {
       this.physics.add.collider(this.player, this.ground);
     }
 
-    // Camera follows the player
-    this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+    // Input (keyboard + gamepad + HUD touch buttons), camera and movement
+    this.inputState = new InputState(this, s.mode);
+    this.cameraDirector = new CameraDirector(this, this.player, {
+      onTap: () => this.closeDialogue(), // tap / click on empty space (not a drag or pinch)
+    });
+    this.controls = mode.createController(this, this.player, this.inputState);
 
-    // Controls, then the screen-space HUD (dialogue, touch buttons, menu) on top.
-    // launch() restarts the HUD when this scene restarts, so it always matches the current mode.
-    this.controls = mode.createController(this, this.player);
+    // Screen-space HUD (dialogue, touch buttons, menu) on top. launch() restarts the HUD when
+    // this scene restarts, so it always matches the current mode and input state.
     this.hud = this.scene.get('Hud');
-    this.scene.launch('Hud', { world: this, mode: s.mode, controls: this.controls });
+    this.scene.launch('Hud', { world: this, mode: s.mode, input: this.inputState });
 
     // World objects from data
     this.objectViews = [];
@@ -88,13 +91,18 @@ export class WorldScene extends Phaser.Scene {
       this.objectViews.push(view);
     }
 
-    // Click anywhere else: close a locked dialogue
-    this.input.on('pointerdown', () => this.closeDialogue());
-
     this.cameras.main.fadeIn(250, 255, 255, 255);
   }
 
   update() {
+    const input = this.inputState;
+    input.update();
+    if (input.cancelPressed) this.closeDialogue();
+    if (input.isMoving) {
+      // Walking away closes a locked dialogue and brings the camera back to the player
+      this.closeDialogue();
+      this.cameraDirector.follow();
+    }
     this.controls.update();
   }
 
@@ -112,14 +120,28 @@ export class WorldScene extends Phaser.Scene {
     this.dialogue?.hide();
   }
 
-  /** Close a locked dialogue (✕, tap on empty space) and glide the camera back to the player. */
+  /**
+   * Lock the dialogue open for an object. With `pan`, the camera frames the object in the part of
+   * the screen the box leaves visible; without it, the box goes wherever it doesn't hide the object.
+   */
+  openDialogue(data, target, { pan = true } = {}) {
+    this.isDialogueLocked = true;
+    this.dialogueTarget = target;
+    if (!pan) {
+      this.showDialogue(data, { placement: this.dialoguePlacementFor(target.x, target.y) });
+      return;
+    }
+    this.showDialogue(data, { placement: 'bottom' });
+    this.cameraDirector.focusOn(target.x, target.y, this.dialogue?.getCoverage());
+  }
+
+  /** Close a locked dialogue (✕, Esc / B, tap on empty space, moving) and return the camera. */
   closeDialogue() {
     if (!this.isDialogueLocked) return;
     this.isDialogueLocked = false;
+    this.dialogueTarget = null;
     this.hideDialogue();
-    this.cameras.main.pan(this.player.x, this.player.y, 1000, 'Power2', true, (camera, progress) => {
-      if (progress === 1) camera.startFollow(this.player, true, 0.1, 0.1);
-    });
+    this.cameraDirector.follow();
   }
 
   /** Bottom unless the point (world coords) would be hidden under a bottom-anchored box. */

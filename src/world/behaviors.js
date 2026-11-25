@@ -19,18 +19,7 @@ function attachDialogue(scene, view, data, { pan }) {
   target.on('pointerout', () => { if (!scene.isDialogueLocked) scene.hideDialogue(); });
   target.on('pointerdown', (pointer, localX, localY, event) => {
     event.stopPropagation();
-    scene.isDialogueLocked = true;
-    if (!pan) {
-      scene.showDialogue(data, { placement: scene.dialoguePlacementFor(target.x, target.y) });
-      return;
-    }
-    // Centre the object in the part of the screen the dialogue box leaves visible
-    scene.showDialogue(data, { placement: 'bottom' });
-    const cam = scene.cameras.main;
-    const { edge, size } = scene.dialogue?.getCoverage() ?? { edge: 'bottom', size: 0 };
-    const offset = (size / 2 / cam.zoom) * (edge === 'bottom' ? 1 : -1);
-    cam.stopFollow();
-    cam.pan(target.x, target.y + offset, 500, 'Power2', true);
+    scene.openDialogue(data, target, { pan });
   });
 }
 

@@ -22,7 +22,11 @@ const TOUCH_LAYOUTS = {
  * Screen-space HUD, run in parallel above WorldScene: dialogue box, touch buttons, menu.
  * It has its own camera that never scrolls or zooms, so nothing here needs counter-zoom maths,
  * and Phaser's globalTopOnly input keeps taps on HUD buttons from reaching the world below.
- * Launched (and re-launched on every scene change) by WorldScene with { world, mode, controls }.
+ * Launched (and re-launched on every scene change) by WorldScene with { world, mode, input }.
+ *
+ * Touch controls: shown on touch devices and hidden on desktop. Until the player picks a setting
+ * in the ☰ menu, they also follow the input in use: hidden after keyboard/gamepad input, shown again
+ * after a touch. The menu choice is remembered (localStorage) and overrides the automatic behaviour.
  */
 export class HudScene extends Phaser.Scene {
   constructor() {
@@ -32,7 +36,7 @@ export class HudScene extends Phaser.Scene {
   init(data) {
     this.world = data.world;
     this.mode = data.mode;
-    this.controls = data.controls;
+    this.inputState = data.input;
   }
 
   create() {
@@ -40,7 +44,14 @@ export class HudScene extends Phaser.Scene {
     this.dialogue = new DialogueUI(this, { onClose: () => this.world.closeDialogue() });
     this.createTouchControls();
     this.createMenu();
-    this.setTouchControlsVisible(loadTouchPref(this.sys.game.device.input.touch));
+    this.touchPref = loadTouchPref(); // null = automatic
+    this.setTouchControlsVisible(this.touchPref ?? this.sys.game.device.input.touch);
+    const onSource = (source) => {
+      if (this.touchPref !== null) return;
+      if (source === 'touch') this.setTouchControlsVisible(true);
+      else if (source === 'keyboard' || source === 'gamepad') this.setTouchControlsVisible(false);
+    };
+    this.inputState.on('source', onSource);
 
     // A touch that ends anywhere (or the tab losing focus) must never leave a button stuck down
     this.input.on('pointerup', (pointer) => this.touchButtons.forEach((b) => b.release(pointer)));
@@ -48,6 +59,7 @@ export class HudScene extends Phaser.Scene {
     this.game.events.on(Phaser.Core.Events.BLUR, releaseAll);
     this.events.once('shutdown', () => {
       this.game.events.off(Phaser.Core.Events.BLUR, releaseAll);
+      this.inputState.off('source', onSource);
       this.dialogue = null; // WorldScene checks this until the relaunched HUD has created its own
     });
   }
@@ -69,7 +81,7 @@ export class HudScene extends Phaser.Scene {
     const held = new Set();
     const sync = () => {
       const down = held.size > 0;
-      this.controls.mobileControls[key] = down;
+      this.inputState.setTouch(key, down);
       bg.setFillStyle(0x000000, down ? 0.6 : 0.3);
     };
     bg.on('pointerdown', (pointer) => { held.add(pointer.id); sync(); });
@@ -83,7 +95,6 @@ export class HudScene extends Phaser.Scene {
 
   setTouchControlsVisible(on) {
     this.touchVisible = on;
-    saveTouchPref(on);
     this.touchButtons.forEach((b) => b.setVisible(on));
     this.dialogue.setSafeArea(this.computeSafeArea());
     this.menuText?.setText(on ? 'Hide touch controls' : 'Show touch controls');
@@ -115,7 +126,12 @@ export class HudScene extends Phaser.Scene {
     const setOpen = (open) => { this.menuOpen = open; item.setVisible(open); this.menuText.setVisible(open); };
     setOpen(false);
     burger.on('pointerdown', () => setOpen(!this.menuOpen));
-    item.on('pointerdown', () => { this.setTouchControlsVisible(!this.touchVisible); setOpen(false); });
+    item.on('pointerdown', () => {
+      this.touchPref = !this.touchVisible;
+      saveTouchPref(this.touchPref);
+      this.setTouchControlsVisible(this.touchPref);
+      setOpen(false);
+    });
     // Tapping anywhere else closes the menu
     this.input.on('pointerdown', (pointer, over) => {
       if (this.menuOpen && !over.includes(burger) && !over.includes(item)) setOpen(false);
@@ -123,12 +139,13 @@ export class HudScene extends Phaser.Scene {
   }
 }
 
-function loadTouchPref(fallback) {
+/** @returns {boolean | null} the player's explicit choice, or null for automatic */
+function loadTouchPref() {
   try {
     const v = window.localStorage.getItem(TOUCH_PREF_KEY);
-    return v === null ? fallback : v === '1';
+    return v === null ? null : v === '1';
   } catch {
-    return fallback;
+    return null;
   }
 }
 

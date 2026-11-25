@@ -56,11 +56,27 @@ The game and the editor both call `create()`, so what you see in the editor is w
 - `WorldScene` launches `HudScene` on top of itself, and launches it again on every scene change. The HUD holds the screen-space UI: the dialogue box (`src/DialogueUI.js`), the touch buttons and the ☰ menu. Its camera never scrolls or zooms, and Phaser's `globalTopOnly` input means a tap on a HUD button never reaches the world. World code talks to the HUD through `WorldScene.showDialogue(data, { placement })`, `hideDialogue()` and `closeDialogue()`.
 - `DialogueUI` sizes itself to its content (up to 45% of the screen height), sits at the bottom or the top (`placement`), keeps clear of the touch buttons through `setSafeArea()`, and reports `getCoverage()` so the camera can frame the object in the part of the screen that is still visible.
 
+### Input and camera
+`src/GameControllers.js` has three parts. `WorldScene.update()` drives them once per frame:
+- `InputState` merges the keyboard, the first connected gamepad and the HUD's touch buttons into actions: `moveX`/`moveY` (−1..1), `jump`, `interactPressed` and `cancelPressed`. It also tracks the last input `source` and emits `'source'` when it changes. The HUD uses that to show or hide the touch controls.
+- `CameraDirector` is the **only** code that may call `startFollow`, `stopFollow` or `pan` on the main camera. It has three modes: `follow` (tracking the player), `focus` (panned to an object; see `focusOn(x, y, coverage)`) and `free` (the player dragged the view). It also handles wheel and pinch zoom (1–2×), drag-to-pan after an 8 px threshold when zoomed in, and an `onTap` callback for taps on empty space.
+- `TopDownController` / `PlatformerController` only turn `InputState` into velocity and animation.
+
+Any movement input closes a locked dialogue and returns the camera to `follow`.
+
+| Action | Keyboard | Gamepad | Touch / mouse |
+|---|---|---|---|
+| Move | WASD / arrows | Left stick / d-pad | On-screen buttons |
+| Jump (galleries) | Space, W, ↑ | A | JUMP |
+| Close dialogue | Esc | B | ✕, or tap empty space |
+| Zoom | — | — | Mouse wheel / pinch |
+| Pan when zoomed | — | — | Drag |
+
 ## File map
 | Path | Role |
 |---|---|
 | `src/main.js` | Phaser game config |
-| `src/GameControllers.js` | Player controllers and zoom/pan |
+| `src/GameControllers.js` | `InputState` (keyboard/gamepad/touch), `CameraDirector`, movement controllers |
 | `src/DialogueUI.js` | Dialogue box (rendered in the HUD) |
 | `src/world/` | Object registry, behaviours, world loader |
 | `src/scenes/` | Boot, World and HUD scenes |
