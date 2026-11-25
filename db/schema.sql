@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS scenes (
 CREATE TABLE IF NOT EXISTS objects (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   scene_id    text NOT NULL REFERENCES scenes(id) ON DELETE CASCADE ON UPDATE CASCADE,
-  type        text NOT NULL CHECK (type IN ('painting', 'link', 'portal', 'promo', 'text', 'decor')),
+  type        text NOT NULL CHECK (type IN ('painting', 'link', 'portal', 'promo', 'text', 'decor', 'npc')),
   x           real NOT NULL,
   y           real NOT NULL,
   size        real NOT NULL DEFAULT 100 CHECK (size > 0),
@@ -51,4 +51,29 @@ CREATE TABLE IF NOT EXISTS assets (
   width       integer,
   height      integer,
   created_at  timestamptz NOT NULL DEFAULT now()
+);
+
+-- Upgrade older databases: the inline CHECK above only applies when the table is first created.
+-- Keep this list in sync with it (and with PROP_SPECS in api/_lib/validate.js).
+ALTER TABLE objects DROP CONSTRAINT IF EXISTS objects_type_check;
+ALTER TABLE objects ADD CONSTRAINT objects_type_check
+  CHECK (type IN ('painting', 'link', 'portal', 'promo', 'text', 'decor', 'npc'));
+
+-- NPC chat: pre-scraped reference pages per NPC object (no FK: publish/restore must not cascade here)
+CREATE TABLE IF NOT EXISTS npc_knowledge (
+  id          serial PRIMARY KEY,
+  object_id   uuid NOT NULL,
+  url         text NOT NULL,
+  title       text NOT NULL DEFAULT '',
+  content     text NOT NULL DEFAULT '',
+  fetched_at  timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (object_id, url)
+);
+CREATE INDEX IF NOT EXISTS npc_knowledge_object_idx ON npc_knowledge (object_id);
+
+-- NPC chat: fixed-window rate-limit counters (keys are hashed IPs or global buckets)
+CREATE TABLE IF NOT EXISTS npc_rate (
+  key           text PRIMARY KEY,
+  window_start  timestamptz NOT NULL DEFAULT now(),
+  count         integer NOT NULL DEFAULT 0
 );

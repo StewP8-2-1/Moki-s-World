@@ -18,7 +18,8 @@ Preview URLs are behind **Vercel Authentication**; production is public. To scri
 |---|---|
 | `framework: vite`, `outputDirectory: dist` | A static Vite multi-page build (`index.html` + `admin.html`) |
 | `cleanUrls: true` | The editor is served at `/admin`; `/admin.html` redirects there |
-| Rewrite `/api/admin/:path*` → `/api/admin?__path=:path*` | All admin endpoints run in **one** function (`api/admin.js`). The Hobby plan allows at most **12 functions per deployment**, and the project uses 2 |
+| Rewrite `/api/admin/:path*` → `/api/admin?__path=:path*` | All admin endpoints run in **one** function (`api/admin.js`). The Hobby plan allows at most **12 functions per deployment**, and the project uses 3 (`world`, `admin`, `npc`) |
+| `functions["api/npc.js"].maxDuration: 60` | NPC replies stream and may fetch pages, so they get up to 60 s |
 | Headers on everything | `X-Content-Type-Options: nosniff`, `Referrer-Policy`, and `X-Frame-Options: DENY` (no clickjacking of the editor) |
 | `/admin` | `X-Robots-Tag: noindex` and `Cache-Control: no-store` |
 | `/assets/*` | Hashed build files are cached for a year (`immutable`) |
@@ -48,6 +49,7 @@ Preview URLs are behind **Vercel Authentication**; production is public. To scri
 | Neon database | Vercel marketplace integration, resource `mokis-world-db`, free plan, region `sin1` (Singapore). Sets `DATABASE_URL` |
 | Blob store | `mokis-world-media`, public access, region `sin1`. Sets `BLOB_READ_WRITE_TOKEN` |
 | `AUTH_SECRET` | Random 32-byte hex, marked sensitive, set for all environments |
+| AI Gateway (NPC chat) | Enable **AI Gateway** for the project; deployed functions authenticate via OIDC. Locally, `npx vercel env pull .env.local` provides `VERCEL_OIDC_TOKEN` (valid about 12 h), or set `AI_GATEWAY_API_KEY`. Optional: `TAVILY_API_KEY` / `BRAVE_SEARCH_API_KEY` for NPC web search, plus the `NPC_*` limits in `docs/NPC.md` |
 | `ADMIN_PASSWORD` | Sensitive, set for all environments. Change it in the Vercel dashboard (Settings → Environment Variables), then redeploy. All sessions are signed out |
 
 The database was seeded on 2026-11-25 with `npm run db:seed`, which published version 1 (3 scenes, 16 objects).

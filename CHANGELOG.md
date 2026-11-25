@@ -6,6 +6,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ## [Unreleased]
 
 ### Added
+- **NPCs you can chat with.** The new 💬 **NPC (chat)** object type has a name, greeting, persona and reference URLs. Walk up and press E (or click) to open a chat panel.
+  - Replies stream from a cloud LLM via the Vercel AI SDK and AI Gateway. The default is `anthropic/claude-haiku-5.5`, with `google/gemini-3.5-flash-lite` as fallback.
+  - NPCs ground answers in a pre-scraped knowledge pack (new `npc_knowledge` table). They can also read pages live (`fetch_page`) and, optionally, search (`search_web`, Tavily/Brave), but only on their own reference sites. Sources are shown as links.
+  - New public function `api/npc.js` with same-origin, input-size and per-IP/daily rate limits (`npc_rate` table). Admin endpoint `/api/admin/npc-knowledge/:id` re-scrapes the knowledge pack.
+  - NPCs know the world: a `world_info` tool and a prompt overview built from the database (paintings with descriptions and requesters, galleries, portals, links, active promos, signs, other NPCs, with where to find them). *Preview as player* chats use the draft world.
+  - See `docs/NPC.md`.
 - Keyboard, gamepad and touch players can now use paintings, promos and links without a mouse. Walk up to one and a prompt naming it appears, pinned to the top-left of the screen ("E · View — Renaissance", "A · Open — Follow on Facebook!", "ACT · View — …"). Press E, Enter or Space (top-down), gamepad A (top-down) or X, or the on-screen **ACT** button, which appears only when something is in range. Pressing interact again on an open promo follows its button, and on a painting it closes the dialogue. The CTA shows the key to press.
 - If the browser blocks a link opened from a gamepad, the link appears in the dialogue with a button to click or tap instead.
 - Clicking or tapping the painting that is already open closes its dialogue. Hover previews are mouse-only, so a tap on a touch screen no longer flashes a preview.

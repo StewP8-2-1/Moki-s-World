@@ -42,6 +42,14 @@ This table holds a single row (`id = 1`) with `changed_at`. Every admin write bu
 ### `assets`
 `id`, `url`, `name`, `width`, `height`, `created_at`. This is the media library for uploaded images.
 
+### `npc_knowledge`
+`object_id` (uuid of an `npc` object, no foreign key so publish/restore never cascade), `url`, `title`, `content` (scraped text, max about 12k chars), `fetched_at`. Unique on `(object_id, url)`. This is the NPC's knowledge pack.
+
+### `npc_rate`
+`key` (`ip:<sha256>` or `global:day`), `window_start`, `count`. Fixed-window counters for `/api/npc` rate limits.
+
+The `objects.type` CHECK is re-applied by `ALTER TABLE … DROP/ADD CONSTRAINT objects_type_check` at the end of `schema.sql`, so `npm run db:migrate` upgrades older databases.
+
 ## Object `props` by type
 | type | props |
 |---|---|
@@ -51,6 +59,7 @@ This table holds a single row (`id = 1`) with `changed_at`. Every admin write bu
 | `promo` | `imageUrl, title, body, ctaLabel, ctaUrl, startsAt?, endsAt?` |
 | `text` | `text, fontSize, color` |
 | `decor` | `imageUrl` |
+| `npc` | `imageUrl, name, greeting, persona, referenceUrls` (newline-separated, max 10), `liveWeb, label, labelSize, labelOffset` |
 
 ## Snapshot format
 The same format is used by `world_versions.snapshot`, `GET /api/world` and `src/data/fallbackWorld.json`:

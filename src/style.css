@@ -24,3 +24,39 @@ html, body {
 canvas {
   display: block;
 }
+
+/* ---------- NPC chat panel (src/ui/NpcChat.js) — black-ink doodle look ---------- */
+.npc-chat {
+  position: fixed;
+  left: 50%;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(560px, calc(100vw - 24px));
+  max-height: min(45dvh, 420px);
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  color: #000;
+  border: 4px solid #000;
+  border-radius: 18px 14px 20px 12px;
+  box-shadow: 6px 6px 0 #000;
+  font: 16px/1.4 Arial, Helvetica, sans-serif;
+  z-index: 20;
+}
+.npc-chat[hidden] { display: none; }
+.npc-chat__header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 3px solid #000; }
+.npc-chat__title { margin: 0; font-size: 18px; font-weight: bold; }
+.npc-chat__close { min-width: 44px; min-height: 44px; border: 0; background: none; font-size: 22px; cursor: pointer; }
+.npc-chat__log { flex: 1; overflow-y: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; overscroll-behavior: contain; }
+.npc-chat__msg { max-width: 85%; padding: 8px 12px; border: 3px solid #000; border-radius: 14px 10px 16px 8px; }
+.npc-chat__msg--npc { align-self: flex-start; background: #fff; }
+.npc-chat__msg--me { align-self: flex-end; background: #000; color: #fff; }
+.npc-chat__msg.is-error { border-style: dashed; }
+.npc-chat__text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.npc-chat__status { display: block; font-size: 13px; font-style: italic; opacity: 0.7; }
+.npc-chat__sources { margin: 6px 0 0; padding-left: 18px; font-size: 13px; }
+.npc-chat__sources a { color: #000; }
+.npc-chat__form { display: flex; gap: 8px; padding: 8px 12px 12px; border-top: 3px solid #000; }
+.npc-chat__input { flex: 1; min-height: 44px; padding: 0 12px; border: 3px solid #000; border-radius: 10px; font: inherit; min-width: 0; }
+.npc-chat__send { min-height: 44px; padding: 0 16px; border: 3px solid #000; border-radius: 10px; background: #000; color: #fff; font: inherit; font-weight: bold; cursor: pointer; }
+.npc-chat__send:disabled, .npc-chat__input:disabled { opacity: 0.5; cursor: default; }

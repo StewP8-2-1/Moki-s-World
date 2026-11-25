@@ -15,9 +15,13 @@
     "vite": "^8.3.0"
   },
   "dependencies": {
+    "@mozilla/readability": "^0.6.0",
     "@neondatabase/serverless": "^1.2.1",
     "@vercel/blob": "^2.9.0",
+    "ai": "^7.0.181",
     "jose": "^6.2.18",
-    "phaser": "^4.2.1"
+    "linkedom": "^0.18.15",
+    "phaser": "^4.2.1",
+    "zod": "^4.6.7"
   }
 }

@@ -87,6 +87,27 @@ export const OBJECT_TYPES = {
     fields: [IMAGE_FIELD],
     create: imageWithLabel,
   },
+  npc: {
+    label: 'NPC (chat)', icon: '💬',
+    defaults: {
+      size: 110, depth: 0,
+      props: {
+        imageUrl: 'placeholder.png', name: 'Pip', greeting: 'Hi! Ask me anything.',
+        persona: 'A cheerful doodle who loves art and knows this website well.',
+        referenceUrls: '', liveWeb: false, label: 'Pip', labelSize: 18, labelOffset: -75,
+      },
+    },
+    fields: [
+      IMAGE_FIELD,
+      { key: 'name', label: 'Name', input: 'text', required: true },
+      { key: 'greeting', label: 'Greeting (first line shown)', input: 'textarea', rows: 2 },
+      { key: 'persona', label: 'Persona — who they are, how they talk, what they know (public)', input: 'textarea', rows: 6 },
+      { key: 'referenceUrls', label: 'Reference URLs (one per line, max 10)', input: 'textarea', rows: 4 },
+      { key: 'liveWeb', label: 'Allow live web search on reference sites', input: 'checkbox' },
+      ...LABEL_FIELDS,
+    ],
+    create: imageWithLabel,
+  },
 };
 
 function textStyle(fontSize = 18, color = '#000000') {
