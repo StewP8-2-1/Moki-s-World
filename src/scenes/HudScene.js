@@ -37,9 +37,7 @@ export class HudScene extends Phaser.Scene {
 
   create() {
     this.touchButtons = [];
-    this.dialogue = new DialogueUI(this, {
-      width: this.cameras.main.width + 10, height: 140, paddingTop: 20, titleSpacing: 0, bottomMargin: 140,
-    });
+    this.dialogue = new DialogueUI(this, { onClose: () => this.world.closeDialogue() });
     this.createTouchControls();
     this.createMenu();
     this.setTouchControlsVisible(loadTouchPref(this.sys.game.device.input.touch));
@@ -87,7 +85,22 @@ export class HudScene extends Phaser.Scene {
     this.touchVisible = on;
     saveTouchPref(on);
     this.touchButtons.forEach((b) => b.setVisible(on));
+    this.dialogue.setSafeArea(this.computeSafeArea());
     this.menuText?.setText(on ? 'Hide touch controls' : 'Show touch controls');
+  }
+
+  /** Horizontal band the bottom dialogue must leave free so it sits between the button clusters. */
+  computeSafeArea() {
+    const { width } = this.cameras.main;
+    const gap = 8;
+    let left = 0;
+    let right = 0;
+    for (const { bg } of this.touchButtons) {
+      if (!this.touchVisible || !bg.visible) continue;
+      if (bg.x < width / 2) left = Math.max(left, bg.x + bg.width / 2 + gap);
+      else right = Math.max(right, width - (bg.x - bg.width / 2) + gap);
+    }
+    return { left, right, bottom: 0 };
   }
 
   // ---------- burger menu ----------

@@ -53,7 +53,8 @@ The game and the editor both call `create()`, so what you see in the editor is w
 - `WorldScene({ sceneId })` builds one scene from the data. Its `mode` picks the controller from `src/GameControllers.js`:
   - `topdown` → `TopDownController`
   - `platformer` → `PlatformerController`
-- `WorldScene` launches `HudScene` on top of itself, and launches it again on every scene change. The HUD holds the screen-space UI: the dialogue box (`src/DialogueUI.js`), the touch buttons and the ☰ menu. Its camera never scrolls or zooms, and Phaser's `globalTopOnly` input means a tap on a HUD button never reaches the world. World code talks to the HUD through `WorldScene.showDialogue()` / `hideDialogue()`.
+- `WorldScene` launches `HudScene` on top of itself, and launches it again on every scene change. The HUD holds the screen-space UI: the dialogue box (`src/DialogueUI.js`), the touch buttons and the ☰ menu. Its camera never scrolls or zooms, and Phaser's `globalTopOnly` input means a tap on a HUD button never reaches the world. World code talks to the HUD through `WorldScene.showDialogue(data, { placement })`, `hideDialogue()` and `closeDialogue()`.
+- `DialogueUI` sizes itself to its content (up to 45% of the screen height), sits at the bottom or the top (`placement`), keeps clear of the touch buttons through `setSafeArea()`, and reports `getCoverage()` so the camera can frame the object in the part of the screen that is still visible.
 
 ## File map
 | Path | Role |

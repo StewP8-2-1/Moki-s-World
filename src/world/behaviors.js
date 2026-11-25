@@ -13,16 +13,24 @@ function openUrl(url, newTab = true) {
 function attachDialogue(scene, view, data, { pan }) {
   const target = view.main;
   target.setInteractive({ useHandCursor: true });
-  target.on('pointerover', () => { if (!scene.isDialogueLocked) scene.showDialogue(data); });
+  target.on('pointerover', () => {
+    if (!scene.isDialogueLocked) scene.showDialogue(data, { placement: scene.dialoguePlacementFor(target.x, target.y) });
+  });
   target.on('pointerout', () => { if (!scene.isDialogueLocked) scene.hideDialogue(); });
   target.on('pointerdown', (pointer, localX, localY, event) => {
     event.stopPropagation();
     scene.isDialogueLocked = true;
-    scene.showDialogue(data);
-    if (pan) {
-      scene.cameras.main.stopFollow();
-      scene.cameras.main.pan(target.x, target.y + 70, 500, 'Power2');
+    if (!pan) {
+      scene.showDialogue(data, { placement: scene.dialoguePlacementFor(target.x, target.y) });
+      return;
     }
+    // Centre the object in the part of the screen the dialogue box leaves visible
+    scene.showDialogue(data, { placement: 'bottom' });
+    const cam = scene.cameras.main;
+    const { edge, size } = scene.dialogue?.getCoverage() ?? { edge: 'bottom', size: 0 };
+    const offset = (size / 2 / cam.zoom) * (edge === 'bottom' ? 1 : -1);
+    cam.stopFollow();
+    cam.pan(target.x, target.y + offset, 500, 'Power2', true);
   });
 }
 

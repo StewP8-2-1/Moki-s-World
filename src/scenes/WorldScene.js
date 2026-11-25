@@ -88,15 +88,8 @@ export class WorldScene extends Phaser.Scene {
       this.objectViews.push(view);
     }
 
-    // Click anywhere else: close a locked dialogue and glide the camera back to the player
-    this.input.on('pointerdown', () => {
-      if (!this.isDialogueLocked) return;
-      this.isDialogueLocked = false;
-      this.hideDialogue();
-      this.cameras.main.pan(this.player.x, this.player.y, 1000, 'Power2', false, (camera, progress) => {
-        if (progress === 1) camera.startFollow(this.player, true, 0.1, 0.1);
-      });
-    });
+    // Click anywhere else: close a locked dialogue
+    this.input.on('pointerdown', () => this.closeDialogue());
 
     this.cameras.main.fadeIn(250, 255, 255, 255);
   }
@@ -106,12 +99,34 @@ export class WorldScene extends Phaser.Scene {
   }
 
   /** Dialogue lives in the HUD scene, which starts one tick after this one (launch is queued). */
-  showDialogue(data) {
-    this.hud.dialogue?.show(data);
+  get dialogue() {
+    return this.hud.dialogue;
+  }
+
+  /** @param {{ placement?: 'bottom' | 'top' }} [opts] */
+  showDialogue(data, opts) {
+    this.dialogue?.show(data, opts);
   }
 
   hideDialogue() {
-    this.hud.dialogue?.hide();
+    this.dialogue?.hide();
+  }
+
+  /** Close a locked dialogue (✕, tap on empty space) and glide the camera back to the player. */
+  closeDialogue() {
+    if (!this.isDialogueLocked) return;
+    this.isDialogueLocked = false;
+    this.hideDialogue();
+    this.cameras.main.pan(this.player.x, this.player.y, 1000, 'Power2', true, (camera, progress) => {
+      if (progress === 1) camera.startFollow(this.player, true, 0.1, 0.1);
+    });
+  }
+
+  /** Bottom unless the point (world coords) would be hidden under a bottom-anchored box. */
+  dialoguePlacementFor(x, y) {
+    const cam = this.cameras.main;
+    const screenY = (y - cam.worldView.y) * cam.zoom;
+    return screenY > cam.height * 0.55 ? 'top' : 'bottom';
   }
 
   /** Called by portal behaviours. */
