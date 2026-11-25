@@ -7,7 +7,7 @@
  *
  * Always (re)writes src/data/fallbackWorld.json, which the game uses if /api/world is unreachable.
  */
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { writeFile, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { legacyWorld } from './legacyWorld.js';
@@ -43,10 +43,8 @@ if (dryRun) {
 const { getSql } = await import('../api/_lib/db.js');
 const sql = getSql();
 
-const schema = await readFile(path.join(root, 'db/schema.sql'), 'utf8');
-for (const stmt of schema.split(/;\s*$/m).map((s) => s.replace(/^\s*--.*$/gm, '').trim()).filter(Boolean)) {
-  await sql.query(stmt);
-}
+const { applySchema } = await import('./migrate.js');
+await applySchema(sql);
 console.log('Schema applied.');
 
 const [{ count }] = await sql`SELECT count(*)::int AS count FROM scenes`;

@@ -33,6 +33,12 @@
 ### `world_versions`
 `id serial`, `snapshot jsonb`, `published_at timestamptz`, `note text`. The game reads the row with the highest `id`.
 
+### `draft_state`
+This table holds a single row (`id = 1`) with `changed_at`. Every admin write bumps it. The draft has unpublished changes when `changed_at` is later than the latest `world_versions.published_at`.
+
+### Migrations
+`db/schema.sql` is idempotent. Run `npm run db:migrate` (`scripts/migrate.js`) after changing it; `npm run db:seed` also applies it first.
+
 ### `assets`
 `id`, `url`, `name`, `width`, `height`, `created_at`. This is the media library for uploaded images.
 

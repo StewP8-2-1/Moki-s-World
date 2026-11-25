@@ -37,6 +37,13 @@ CREATE TABLE IF NOT EXISTS world_versions (
   published_at  timestamptz NOT NULL DEFAULT now()
 );
 
+-- Single row tracking when the draft last changed (drives the "unpublished changes" indicator)
+CREATE TABLE IF NOT EXISTS draft_state (
+  id          integer PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  changed_at  timestamptz NOT NULL DEFAULT now()
+);
+INSERT INTO draft_state (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
+
 CREATE TABLE IF NOT EXISTS assets (
   id          serial PRIMARY KEY,
   url         text NOT NULL UNIQUE,

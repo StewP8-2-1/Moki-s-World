@@ -29,11 +29,17 @@ There is a single password (`ADMIN_PASSWORD`).
 | POST | `/api/admin/login` ✅ | `{ password }` → `200 { ok: true }` and sets the cookie, or `401 Wrong password` |
 | POST | `/api/admin/logout` ✅ | Clears the cookie |
 | GET | `/api/admin/me` ✅ | `200 { admin: true }` if logged in, else `401` |
-| GET | `/api/admin/draft` ✅ | `{ world, published }`: `world` is the editable draft in snapshot format; `published` is `{ version, publishedAt, note }` or `null` |
-| GET / POST | `/api/admin/scenes` | List scenes / create a scene |
-| GET / PUT / DELETE | `/api/admin/scenes/:id` | Read / update / delete one scene |
-| GET / POST | `/api/admin/objects?scene=:id` | List / create objects |
-| PATCH / DELETE | `/api/admin/objects/:id` | Update / delete one object |
+| GET | `/api/admin/draft` ✅ | `{ world, published, changedAt, hasUnpublishedChanges }`: `world` is the editable draft in snapshot format; `published` is `{ version, publishedAt, note }` or `null` |
+| GET | `/api/admin/scenes` ✅ | List scenes, without objects |
+| POST | `/api/admin/scenes` ✅ | `{ id, name, mode, width, height, spawn, background?, ground?, sort? }` → `201 { scene }`. `409` if the id exists. `sort` defaults to last |
+| PUT | `/api/admin/scenes/:id` ✅ | Partial update, merged over the stored scene and re-validated. The id itself can't change |
+| DELETE | `/api/admin/scenes/:id` ✅ | Deletes the scene and its objects. Refused (`400`) for `hub` or while portals in other scenes lead to it |
+| GET | `/api/admin/objects?scene=:id` ✅ | List a scene's objects |
+| POST | `/api/admin/objects` ✅ | `{ id?, sceneId, type, x, y, size?, rotation?, depth?, visible?, props }` → `201 { object }`. The client may supply the uuid, so undo/redo keeps ids stable. `409` if it exists |
+| PATCH | `/api/admin/objects/:id` ✅ | Partial update. Fields and `props` keys are merged over the stored object, and the result is fully re-validated. `type` can't change |
+| DELETE | `/api/admin/objects/:id` ✅ | Delete one object |
+
+Every write also bumps `draft_state.changed_at`, which drives `hasUnpublishedChanges`.
 | POST | `/api/admin/publish` | `{ note? }` → snapshot the draft into `world_versions` |
 | GET | `/api/admin/versions` | Version history |
 | POST | `/api/admin/versions/:id/restore` | Copy a snapshot back into the draft tables |

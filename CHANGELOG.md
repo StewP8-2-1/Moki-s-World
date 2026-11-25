@@ -59,6 +59,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   - Click-to-select, synced between the map and the list.
   - A read-only inspector generated from each type's field schema.
   - Remembers the last scene, and adapts to narrow screens.
+- Admin write API:
+  - `GET`/`POST /api/admin/scenes` and `PUT`/`DELETE /api/admin/scenes/:id`. The hub can't be deleted, and neither can a scene that portals still lead to.
+  - `GET`/`POST /api/admin/objects` and `PATCH`/`DELETE /api/admin/objects/:id`. The client can supply object ids, and patches are merged and re-validated.
+- New `draft_state` table, plus `hasUnpublishedChanges` in `/api/admin/draft`.
+- `npm run db:migrate` (`scripts/migrate.js`) applies the schema. The seed reuses it.
 - `scripts/viteDevApi.js`: a Vite dev middleware that runs the `/api` functions locally. It follows Vercel's filesystem routing, including `[param].js`, so `npm run dev` is full-stack.
 
 ### Changed
