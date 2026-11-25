@@ -30,6 +30,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   - Flags: `--dry-run` and `--force`.
   - It always regenerates `src/data/fallbackWorld.json`.
 - `npm run dev:full` runs `vercel dev`, the full stack locally.
+- Infrastructure (not in code): the repo is linked to the Vercel project `moki-s-world`.
+  - The Blob store `mokis-world-media` is in `sin1`.
+  - `AUTH_SECRET` is set on Vercel.
+  - The setup is recorded in `docs/DEPLOYMENT.md`.
+
+### Security
+- Removed the GitHub personal access token that was embedded in the local git remote URL. Pushes now go through Git Credential Manager.
 
 ## [0.1.0] — before the rework
 - Hub scene with social links and portals, plus a "Requested Art" gallery and an "Artwork Showcase" gallery.

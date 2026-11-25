@@ -13,6 +13,17 @@
    - `npm run db:seed -- --dry-run` validates the data and regenerates `src/data/fallbackWorld.json` without a database.
    - `npm run db:seed -- --force` wipes the draft tables and reseeds them. Earlier published versions are kept.
 
+## Current setup (2026-11-25)
+| Resource | Value |
+|---|---|
+| Vercel project | `stoow/moki-s-world` → https://moki-s-world.vercel.app |
+| Neon database | Vercel marketplace integration, resource `mokis-world-db`, free plan, region `sin1` (Singapore). Sets `DATABASE_URL` |
+| Blob store | `mokis-world-media`, public access, region `sin1`. Sets `BLOB_READ_WRITE_TOKEN` |
+| `AUTH_SECRET` | Random 32-byte hex, marked sensitive, set for all environments |
+| `ADMIN_PASSWORD` | Set by the owner in the Vercel dashboard (Settings → Environment Variables) |
+
+The local folder is linked with `vercel link`. `vercel env pull .env.local` refreshes the local secrets. `.env*` and `.vercel` are gitignored.
+
 ## Local development
 ```
 npx vercel link            # once
