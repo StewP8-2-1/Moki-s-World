@@ -203,3 +203,34 @@ input:disabled, textarea:disabled, select:disabled { opacity: .8; }
 }
 input[type="color"] { height: 34px; padding: 3px; cursor: pointer; }
 input[aria-invalid="true"] { border-color: var(--danger); }
+
+/* ---------- Phase 5: media, publish, versions ---------- */
+a.pill { text-decoration: none; }
+a.pill:hover { text-decoration: underline; }
+.dialog.wide { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh - 48px); }
+.dropzone {
+  display: grid; gap: 4px; place-items: center; text-align: center; padding: 18px;
+  border: 2px dashed var(--line); border-radius: 12px; cursor: pointer; margin-bottom: 10px;
+}
+.dropzone:hover, .dropzone.over { border-color: var(--accent); background: var(--accent-soft); }
+.upload-list { display: grid; gap: 6px; margin-bottom: 8px; }
+.upload-row { display: grid; grid-template-columns: 1fr 160px; gap: 10px; align-items: center; font-size: 13px; }
+.upload-row progress { width: 100%; }
+.media-heading { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 14px 0 8px; }
+.media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
+.media-tile {
+  display: grid; gap: 4px; padding: 6px; text-align: left;
+  border: 2px solid var(--line); border-radius: var(--radius); background: var(--panel); color: var(--text);
+  font: inherit; cursor: pointer; min-width: 0;
+}
+.media-tile:hover { border-color: var(--accent); }
+.media-tile[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.media-tile img { width: 100%; aspect-ratio: 1; object-fit: contain; background: var(--bg); border-radius: 4px; }
+.media-name { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.media-meta { font-size: 11px; color: var(--muted); }
+.versions { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 6px; max-height: 55vh; overflow: auto; }
+.versions li { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius); }
+.versions .v-main { flex: 1; min-width: 0; }
+.versions .v-title { font-weight: 600; }
+.versions .v-note { color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#publish-summary { margin: 0 0 12px; }

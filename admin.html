@@ -43,8 +43,10 @@
         </label>
         <div class="spacer"></div>
         <span id="save-status" class="save-status" aria-live="polite"></span>
-        <span id="status" class="pill"></span>
-        <a class="btn" href="/" target="_blank" rel="noopener">View site ↗</a>
+        <a id="status" class="pill" href="/" target="_blank" rel="noopener" title="Open the live site"></a>
+        <button class="btn" id="versions-btn" title="Version history and rollback">History</button>
+        <button class="btn" id="preview-btn" title="Play the draft in a new tab (only you can see it)">Preview ▶</button>
+        <button class="btn primary" id="publish-btn" title="Make your changes live for everyone">Publish</button>
         <button class="btn" id="logout">Sign out</button>
       </header>
 
@@ -99,6 +101,52 @@
           <button class="btn" value="cancel" formnovalidate>Cancel</button>
           <button class="btn primary" value="create" id="new-scene-create">Create scene</button>
         </div>
+      </form>
+    </dialog>
+
+    <!-- Media picker -->
+    <dialog id="media-dialog" class="dialog wide">
+      <form method="dialog">
+        <h2 class="dialog-title">Choose an image</h2>
+        <label id="media-drop" class="dropzone">
+          <input id="media-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden />
+          <strong>Upload from your computer</strong>
+          <span class="muted">Click to browse, or drop images here · PNG, JPG, WebP or GIF up to 10 MB · large images are resized to 2560 px</span>
+        </label>
+        <div id="media-progress" class="upload-list"></div>
+        <h3 class="media-heading">Your uploads</h3>
+        <div id="media-grid" class="media-grid"></div>
+        <h3 class="media-heading">Already in your world</h3>
+        <div id="media-inuse" class="media-grid"></div>
+        <div class="dialog-actions">
+          <button class="btn" id="media-cancel">Cancel</button>
+          <button class="btn primary" id="media-use" disabled>Use image</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- Publish -->
+    <dialog id="publish-dialog" class="dialog">
+      <form method="dialog" id="publish-form">
+        <h2 class="dialog-title">Publish changes</h2>
+        <p id="publish-summary"></p>
+        <label class="field"><span>Note (optional)</span><input name="note" maxlength="200" placeholder="e.g. Added July requests" /></label>
+        <p class="muted small">Everyone will see this version. You can roll back any time from History.</p>
+        <p class="error" id="publish-error" role="alert"></p>
+        <div class="dialog-actions">
+          <button class="btn" value="cancel" formnovalidate>Cancel</button>
+          <button class="btn primary" value="publish" id="publish-confirm">Publish now</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- Versions -->
+    <dialog id="versions-dialog" class="dialog wide">
+      <form method="dialog">
+        <h2 class="dialog-title">Version history</h2>
+        <p class="muted small">Restoring copies an old version into your draft. Check it, then press Publish to make it live.</p>
+        <ol id="versions-list" class="versions"></ol>
+        <div class="dialog-actions"><button class="btn" value="close">Close</button></div>
       </form>
     </dialog>
 

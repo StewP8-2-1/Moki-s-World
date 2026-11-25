@@ -2,7 +2,7 @@
 
 The editor lives at **`/admin.html`** on the site. Locally, it's at `http://localhost:5173/admin.html` after `npm run dev`.
 
-> Status: Phase 4. You can edit everything, and changes save automatically to the **draft**. Publishing the draft to the live site (and uploading images) arrives in Phase 5.
+> Status: complete through Phase 5. Edit, upload images, preview, publish and roll back.
 
 ## Signing in
 1. Open `/admin.html` and enter the admin password.
@@ -23,8 +23,11 @@ The editor lives at **`/admin.html`** on the site. Locally, it's at `http://loca
 - **Zoom:** − / % / +. Click the % to fit the whole scene.
 - **Snap:** positions snap to a 10 px grid.
 - **Save status:** "All changes saved" / "Saving…" / "⚠ Not saved"
-- **Live status:** "Live: version N", or "Unpublished changes"
-- **View site ↗** and **Sign out**
+- **Live status:** "Live: version N", or "Unpublished changes". Click it to open the live site.
+- **History:** past versions and rollback
+- **Preview ▶:** play your draft
+- **Publish:** make your changes live
+- **Sign out**
 
 ## Everyday tasks
 ### Add something
@@ -39,7 +42,15 @@ The editor lives at **`/admin.html`** on the site. Locally, it's at `http://loca
 | 🔤 **Text** | A sign or heading |
 | 🌿 **Decoration** | A non-interactive image |
 
-New objects start with a grey placeholder image. Paste an image URL into the **Image** field, or put the file in `public/` and use its name. Uploading images from your computer arrives in Phase 5.
+New objects start with a grey placeholder image. Click **Choose image…** to replace it.
+
+### Images
+**Choose image…** (next to any Image field, and *Background image* in Scene settings) opens the image picker:
+- **Upload from your computer.** Click the box or drop files onto it. PNG, JPG, WebP and GIF images up to 10 MB are accepted, and you can upload several at once. Very large images are shrunk to 2560 px on the longest side, so the game stays fast on phones.
+- **Your uploads.** Everything you've uploaded, newest first.
+- **Already in your world.** Images the site already uses, such as the social icons and paintings.
+
+Click an image, then **Use image**, or just double-click it. You can still paste any `https://` image address into the field yourself.
 
 ### Move, resize and arrange
 - **Move:** drag the object. With **Snap** on, it lines up to a 10 px grid.
@@ -70,5 +81,9 @@ Select an object and type in the Inspector. Everything saves on its own; watch t
 | Esc | Deselect |
 | Mouse wheel / drag empty space / right-drag | Zoom / pan / pan |
 
-## Draft vs live
-Everything you change is saved to the **draft**. Players keep seeing the last **published** version, and the status pill shows "Unpublished changes" until you publish. The **Publish** button, version history and rollback arrive in Phase 5.
+## Draft, preview, publish
+Everything you change is saved to the **draft**. Players keep seeing the last **published** version until you publish.
+
+1. **Preview ▶** opens the game in a new tab with your draft. An orange banner reminds you it's a preview, and only you can see it while you're signed in.
+2. **Publish** shows what will go live. Add an optional note, such as "Added July requests", and press **Publish now**. Visitors see the new version within about a minute. The button is greyed out when there's nothing new to publish.
+3. **History** lists every published version with its date, note and size. **Restore** copies an old version into your draft and replaces your unpublished changes. Check it, then **Publish** to make it live again. This is how you roll back a mistake.

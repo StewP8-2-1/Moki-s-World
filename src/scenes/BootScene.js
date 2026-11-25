@@ -29,6 +29,7 @@ export class BootScene extends Phaser.Scene {
     const { world, source } = await loadWorld({ draft });
     this.registry.set('world', world);
     this.registry.set('worldSource', source);
+    if (world.draft) showDraftBanner();
 
     this.load.setCORS('anonymous'); // Blob-hosted images
     for (const url of collectImageUrls(world)) {
@@ -50,4 +51,16 @@ export class BootScene extends Phaser.Scene {
     walk('walk-down', 'playerFront');
     walk('walk-side', 'player-side');
   }
+}
+
+/** Small DOM banner so a draft preview is never mistaken for the live site. */
+function showDraftBanner() {
+  const bar = document.createElement('div');
+  bar.textContent = 'Preview of unpublished changes. Players still see the live version.';
+  Object.assign(bar.style, {
+    position: 'fixed', top: '0', left: '0', right: '0', zIndex: '20', padding: '6px 12px',
+    background: '#c98a12', color: '#fff', font: '600 13px system-ui, sans-serif', textAlign: 'center',
+    pointerEvents: 'none',
+  });
+  document.body.append(bar);
 }

@@ -21,6 +21,10 @@ export async function loadWorld({ draft = false, timeoutMs = 5000 } = {}) {
     if (world?.format !== SUPPORTED_FORMAT || !Array.isArray(world.scenes)) throw new Error('Unexpected world format');
     return { world, source: 'api' };
   } catch (err) {
+    if (draft) {
+      console.info(`[world] draft preview unavailable (${err.message}), showing the published world`);
+      return loadWorld({ draft: false, timeoutMs });
+    }
     console.info(`[world] using bundled fallback (${err.message})`);
     return { world: fallbackWorld, source: 'fallback' };
   } finally {

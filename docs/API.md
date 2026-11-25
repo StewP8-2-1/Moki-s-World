@@ -1,13 +1,19 @@
 # API (Vercel Functions)
 
-> Status: ✅ marks implemented endpoints. Everything else is planned for Phases 4–5.
+> Status: ✅ all endpoints are implemented (Phases 1–5).
 
 Handlers live in `api/` and use Web-standard signatures (`export const GET = (request) => Response`). Helpers live in `api/_lib/`, which Vercel does not deploy as functions. Locally, `npm run dev` serves these same files through `scripts/viteDevApi.js`.
 
 ## Public
 | Method | Path | Description |
 |---|---|---|
-| GET | `/api/world` ✅ | Latest published world snapshot (format in `docs/DATABASE.md`). Cached at the CDN (`s-maxage=60, stale-while-revalidate=600`). Returns `404` if nothing is published and `503` if the DB isn't configured. _Phase 5:_ `?draft=1` with a valid admin cookie will return the live draft instead. |
+| GET | `/api/world` ✅ | Latest published world snapshot (format in `docs/DATABASE.md`), plus `version` and `publishedAt`. Returns `404` if nothing is published and `503` if the DB isn't configured. |
+| GET | `/api/world?draft=1` ✅ | The live **draft** (with `draft: true`), for *Preview as player*. Needs the admin cookie (`401` otherwise; the game then falls back to the published world). `Cache-Control: private, no-store` |
+
+**Caching of `/api/world`:**
+- `Cache-Control: public, max-age=0, must-revalidate` makes browsers always check, so returning visitors never see a stale version.
+- `Vercel-CDN-Cache-Control: max-age=60, stale-while-revalidate=600` lets only Vercel's CDN cache it, so a publish goes live within about a minute.
+- Don't put `stale-while-revalidate` in `Cache-Control`. Browsers honour it, and returning visitors would see the previous version once after every publish.
 
 ## Admin auth
 There is a single password (`ADMIN_PASSWORD`).
@@ -40,10 +46,11 @@ There is a single password (`ADMIN_PASSWORD`).
 | DELETE | `/api/admin/objects/:id` ✅ | Delete one object |
 
 Every write also bumps `draft_state.changed_at`, which drives `hasUnpublishedChanges`.
-| POST | `/api/admin/publish` | `{ note? }` → snapshot the draft into `world_versions` |
-| GET | `/api/admin/versions` | Version history |
-| POST | `/api/admin/versions/:id/restore` | Copy a snapshot back into the draft tables |
-| POST | `/api/admin/upload` | Vercel Blob client-upload handshake; records the file in `assets` |
-| GET | `/api/admin/assets` | Media library |
+| POST | `/api/admin/publish` ✅ | `{ note? }` → `201 { published: { version, publishedAt, note } }`. Snapshots the draft into `world_versions`, and the draft becomes "clean" |
+| GET | `/api/admin/versions` ✅ | `{ versions: [{ version, publishedAt, note, scenes, objects }] }`, newest first, at most 100 |
+| POST | `/api/admin/restore` ✅ | `{ version }` → replaces the **draft** with that snapshot, re-validated. Nothing goes live until the next publish. `404` if the version is unknown |
+| POST | `/api/admin/upload` ✅ | Vercel Blob client-upload handshake (`handleUpload`). Only images are allowed (PNG/JPEG/WebP/GIF), up to 10 MB. The path must be `uploads/<safe name>`, and a random suffix is added. The browser then uploads directly to Blob, so there's no 4.5 MB function body limit |
+| GET | `/api/admin/assets` ✅ | Media library: `{ assets: [{ id, url, name, width, height, createdAt }] }` |
+| POST | `/api/admin/assets` ✅ | `{ url, name, width?, height? }` → records a finished upload. Only `https://*.public.blob.vercel-storage.com` URLs are accepted |
 
 Errors use JSON, `{ error: string }`, with standard status codes: 400 validation, 401 auth, 404, 415 content type, 503 not configured, 500.

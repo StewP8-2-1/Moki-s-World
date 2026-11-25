@@ -11,7 +11,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - [x] Phase 2: Data-driven game (object registry, WorldScene)
 - [x] Phase 3: Admin shell (login, read-only scene view)
 - [x] Phase 4: Visual editing (drag, inspector, palette, undo)
-- [ ] Phase 5: Media uploads and publishing (Blob, versions)
+- [x] Phase 5: Media uploads and publishing (Blob, versions)
 - [ ] Phase 6: Deploy to Vercel
 
 ### Added
@@ -77,6 +77,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   - A save status indicator, an "Unpublished changes" pill and toasts.
   - Changed image URLs load on demand.
 - `public/placeholder.png`: the default image for new objects.
+- Publishing and versions:
+  - `POST /api/admin/publish` (with an optional note), `GET /api/admin/versions` and `POST /api/admin/restore`. Restore copies a version into the draft; nothing goes live until you publish.
+  - In the editor: a **Publish** dialog with a summary and note (the button is disabled when there's nothing new), a **History** dialog with per-version Restore, and a status pill that links to the live site.
+- Draft preview:
+  - `GET /api/world?draft=1` (admin only, `no-store`).
+  - **Preview ▶** opens the game on the draft, with an orange "preview" banner.
+  - Without a session, the game falls back to the published world.
+- Image uploads:
+  - `POST /api/admin/upload` issues Vercel Blob client-upload tokens. Only images (PNG/JPEG/WebP/GIF) up to 10 MB are allowed, with safe `uploads/` paths and a random suffix.
+  - `GET`/`POST /api/admin/assets` is the media library. It only accepts Blob URLs.
+  - `src/admin/media.js` is the image picker: drop-zone/browse upload with progress, "Your uploads" and "Already in your world" grids, and double-click to choose. It downscales images over 2560 px in the browser, and the Blob client is lazy-loaded (the admin bundle stays at 38 KB).
+  - The "Choose image…" button appears on every image field, including the scene background image.
 - `scripts/viteDevApi.js`: a Vite dev middleware that runs the `/api` functions locally. It follows Vercel's filesystem routing, including `[param].js`, so `npm run dev` is full-stack.
 
 ### Changed
@@ -93,6 +105,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - `HubScene.js`, `GalleryScene.js` and `ArtworkScene.js`, along with `ReqworkData.js` and `ArtworkData.js`. Their content now lives in the DB and in `src/data/fallbackWorld.json`.
 
 ### Fixed
+- Returning visitors briefly saw the previous world after a publish. Browsers honoured `stale-while-revalidate` in `/api/world`'s `Cache-Control`. CDN caching now goes in `Vercel-CDN-Cache-Control`, and browsers always revalidate.
 - Duplicate `anims.create` warnings on every scene start.
 - The gallery scenes depended on the hub having loaded the portal texture first.
 

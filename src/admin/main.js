@@ -4,6 +4,7 @@ import { createStore } from './store.js';
 import { EditorScene } from './EditorScene.js';
 import { OBJECT_TYPES } from '../world/objectTypes.js';
 import { renderInspector, syncForm, buildForm, objectName, modeLabel, el } from './inspector.js';
+import { createMediaPicker } from './media.js';
 
 const $ = (id) => document.getElementById(id);
 const PREF = { scene: 'mw-editor-scene', snap: 'mw-editor-snap' };
@@ -28,6 +29,21 @@ function toast(message, { type = 'info', timeout = 4000 } = {}) {
   $('toasts').append(node);
   if (timeout) setTimeout(() => node.remove(), timeout);
 }
+
+// ---------- Media picker ----------
+const media = createMediaPicker({ toast });
+const worldImages = () => {
+  const urls = new Set();
+  for (const s of store.world.scenes) {
+    if (s.background?.imageUrl) urls.add(s.background.imageUrl);
+    for (const o of s.objects) if (o.props?.imageUrl) urls.add(o.props.imageUrl);
+  }
+  return [...urls].filter((u) => !/^https?:\/\/[^/]+\.public\.blob\.vercel-storage\.com\//.test(u)); // uploads are listed separately
+};
+const pickImage = (current) => async (path, set) => {
+  const url = await media.open({ current: current(path), worldImages: worldImages() });
+  if (url) set(url);
+};
 
 // ---------- Login ----------
 function showLogin(message = '') {
@@ -130,7 +146,86 @@ function renderStatus() {
     pill.textContent = `Live: version ${ui.published.version}`;
     pill.className = 'pill ok';
   }
-  pill.title = ui.published ? `Version ${ui.published.version} published ${new Date(ui.published.publishedAt).toLocaleString()}` : '';
+  pill.title = ui.published
+    ? `Version ${ui.published.version} published ${new Date(ui.published.publishedAt).toLocaleString()}. Click to open the live site.`
+    : 'Open the site';
+  $('publish-btn').disabled = !ui.dirty && Boolean(ui.published);
+  $('publish-btn').title = $('publish-btn').disabled ? 'Nothing new to publish' : 'Make your changes live for everyone';
+}
+
+// ---------- Publish / preview / history ----------
+$('preview-btn').addEventListener('click', async () => {
+  const tab = window.open('about:blank', '_blank'); // open synchronously so popup blockers allow it
+  await store.flush();
+  if (tab) tab.location.href = '/?draft=1';
+});
+
+$('publish-btn').addEventListener('click', async () => {
+  await store.flush();
+  if (store.isSaving || $('save-status').classList.contains('error')) {
+    toast('Some changes could not be saved yet. Fix the highlighted problem before publishing.', { type: 'error', timeout: 8000 });
+    return;
+  }
+  const scenes = store.world.scenes;
+  const objects = scenes.reduce((n, s) => n + s.objects.length, 0);
+  $('publish-summary').textContent = `${scenes.length} scenes and ${objects} objects will go live${ui.published ? `, replacing version ${ui.published.version}` : ''}.`;
+  $('publish-error').textContent = '';
+  $('publish-form').reset();
+  $('publish-dialog').showModal();
+});
+
+$('publish-form').addEventListener('submit', async (e) => {
+  if (e.submitter?.value !== 'publish') return;
+  e.preventDefault();
+  $('publish-confirm').disabled = true;
+  try {
+    const { published } = await api.publish(new FormData(e.target).get('note') || null);
+    ui.published = published;
+    ui.dirty = false;
+    renderStatus();
+    $('publish-dialog').close();
+    toast(`🎉 Version ${published.version} is live. Visitors see it within about a minute.`, { timeout: 6000 });
+  } catch (err) {
+    $('publish-error').textContent = err.message;
+  } finally {
+    $('publish-confirm').disabled = false;
+  }
+});
+
+$('versions-btn').addEventListener('click', async () => {
+  const list = $('versions-list');
+  list.replaceChildren(el('li', { class: 'muted', text: 'Loading…' }));
+  $('versions-dialog').showModal();
+  try {
+    const { versions } = await api.versions();
+    list.replaceChildren(...versions.map((v) => el('li', {},
+      el('div', { class: 'v-main' },
+        el('div', { class: 'v-title', text: `Version ${v.version}${v.version === ui.published?.version ? ' · live now' : ''}` }),
+        el('div', { class: 'v-note', text: `${new Date(v.publishedAt).toLocaleString()} · ${v.scenes} scenes, ${v.objects} objects${v.note ? ` · ${v.note}` : ''}` })),
+      el('button', { type: 'button', class: 'btn', text: 'Restore', onclick: () => restoreVersion(v.version) }))));
+    if (!versions.length) list.replaceChildren(el('li', { class: 'muted', text: 'Nothing published yet.' }));
+  } catch (err) {
+    list.replaceChildren(el('li', { class: 'error', text: err.message }));
+  }
+});
+
+async function restoreVersion(version) {
+  if (!confirm(`Replace your current draft with version ${version}?\n\nAny unpublished changes will be lost. The live site doesn't change until you press Publish.`)) return;
+  try {
+    await store.flush();
+    await api.restore(version);
+    const { world, published, hasUnpublishedChanges } = await api.draft();
+    store.load(world);
+    ui.published = published;
+    ui.dirty = hasUnpublishedChanges;
+    $('versions-dialog').close();
+    renderStatus();
+    renderSceneSelect();
+    showScene(store.getScene(ui.sceneId) ? ui.sceneId : world.startScene);
+    toast(`Version ${version} restored to your draft. Check it, then press Publish to make it live.`, { timeout: 7000 });
+  } catch (err) {
+    toast(err.message, { type: 'error', timeout: 8000 });
+  }
 }
 
 function renderSceneSelect() {
@@ -278,6 +373,7 @@ function renderInspectorPanel() {
     onChange: (patch, key) => store.updateObject(obj.id, patch, { coalesceKey: key }),
     onDelete: () => deleteSelected(),
     onDuplicate: () => duplicateSelected(),
+    onImagePick: obj && pickImage((path) => path.split('.').reduce((o, k) => o?.[k], selectedObject())),
   });
 }
 
@@ -304,6 +400,7 @@ const SCENE_FIELDS = [
   { path: 'spawn.x', label: 'Player start X', input: 'number', half: true },
   { path: 'spawn.y', label: 'Player start Y', input: 'number', half: true },
   { path: 'background.color', label: 'Background colour', input: 'color' },
+  { path: 'background.imageUrl', label: 'Background image (optional, stretched to fit)', input: 'image' },
 ];
 const GROUND_FIELDS = [
   { path: 'ground.y', label: 'Ground height (Y)', input: 'number', half: true },
@@ -315,6 +412,7 @@ function renderSceneForm() {
   const fields = scene.mode === 'platformer' && scene.ground ? [...SCENE_FIELDS, ...GROUND_FIELDS] : SCENE_FIELDS;
   const form = buildForm(scene, fields, {
     commitOn: 'change', // scene changes save when a field is left, not on every keystroke
+    onImagePick: pickImage((path) => path.split('.').reduce((o, k) => o?.[k], currentScene())),
     onChange: (patch, key) => {
       // Nested objects (spawn, background, ground) are sent whole so partial merges stay valid
       for (const k of ['spawn', 'background', 'ground']) if (patch[k]) patch[k] = { ...scene[k], ...patch[k] };
@@ -394,7 +492,7 @@ $('zoom-fit').addEventListener('click', () => editorScene()?.fit());
 $('snap').addEventListener('change', (e) => pref.set(PREF.snap, e.target.checked ? 'on' : 'off'));
 
 document.addEventListener('keydown', (e) => {
-  if ($('editor-view').hidden || $('new-scene-dialog').open) return;
+  if ($('editor-view').hidden || document.querySelector('dialog[open]')) return;
   const typing = e.target.closest('input, textarea, select, [contenteditable]');
   const mod = e.ctrlKey || e.metaKey;
   const key = e.key.toLowerCase();

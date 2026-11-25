@@ -1,6 +1,6 @@
 # Architecture
 
-> Status: Phases 1–4 are implemented: the API, the DB, the data-driven game, admin auth and the visual editor with autosave. Publishing and uploads (Phase 5) are still planned.
+> Status: Phases 1–5 are implemented: the API, the DB, the data-driven game, admin auth, the visual editor, uploads and publishing. Deployment to Vercel is Phase 6.
 
 ## Editor (`src/admin/`)
 | File | Role |
@@ -10,6 +10,7 @@
 | `main.js` | UI state (`sceneId`, `selectedId`), panels (palette, layers, scene settings, inspector), the new-scene dialog, toasts, keyboard shortcuts and palette drag-and-drop |
 | `EditorScene.js` | Renders one scene with `createObjectView` plus overlays: grid, bounds, ground, a draggable player start, and the selection with its resize handle. It moves and resizes objects by dragging (measured from pointer-down, with snap), loads changed images on demand, and listens to store events so undo/redo and inspector edits show up on the map |
 | `inspector.js` | `buildForm()`/`syncForm()`: auto-saving forms generated from field specs, with client-side checks so half-typed values aren't sent. Also `renderInspector()` and `objectName()` |
+| `media.js` | Media picker dialog (lists uploads plus images already in the world) and `uploadImage()`. It downscales images over 2560 px in the browser, uploads straight to Vercel Blob with a token from `/api/admin/upload` (the Blob client is lazy-loaded), then records the result through `/api/admin/assets` |
 | `api.js` | Fetch wrapper for `/api/admin/*` |
 | `admin.css` | Styles, with light/dark and narrow-screen layouts |
 
@@ -65,3 +66,11 @@ The game and the editor both call `create()`, so what you see in the editor is w
 | `api/` | Serverless endpoints (`api/_lib/` helpers) |
 | `db/schema.sql` | Database schema |
 | `scripts/seed.js` | Seeds the DB from the legacy hardcoded world |
+
+## Publishing model
+```
+editor edits ──► scenes/objects (draft) ──Publish──► world_versions (snapshot N) ──► GET /api/world (CDN, ~60 s)
+                         ▲                                     │
+                         └────────── Restore (any version) ────┘
+Preview ▶  ──► GET /api/world?draft=1 (admin cookie, no-store) ──► game with orange "preview" banner
+```

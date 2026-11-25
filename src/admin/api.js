@@ -28,6 +28,12 @@ export const api = {
   patchObject: (id, patch) => request('PATCH', `/api/admin/objects/${enc(id)}`, patch),
   deleteObject: (id) => request('DELETE', `/api/admin/objects/${enc(id)}`),
 
+  publish: (note) => request('POST', '/api/admin/publish', { note }),
+  versions: () => request('GET', '/api/admin/versions'),
+  restore: (version) => request('POST', '/api/admin/restore', { version }),
+  assets: () => request('GET', '/api/admin/assets'),
+  addAsset: (asset) => request('POST', '/api/admin/assets', asset),
+
   createScene: (scene) => request('POST', '/api/admin/scenes', scene),
   updateScene: (id, patch) => request('PUT', `/api/admin/scenes/${enc(id)}`, patch),
   deleteScene: (id) => request('DELETE', `/api/admin/scenes/${enc(id)}`),
