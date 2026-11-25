@@ -96,11 +96,8 @@ export class WorldScene extends Phaser.Scene {
       this.objectViews.push(view);
     }
 
-    // "E · View" prompt floating above the player when something is in range
-    this.prompt = this.add.text(0, 0, '', {
-      fontSize: '14px', color: '#ffffff', fontFamily: 'Arial', fontStyle: 'bold',
-      backgroundColor: '#000000cc', padding: { x: 8, y: 4 },
-    }).setOrigin(0.5, 1).setDepth(1000).setVisible(false);
+    // Text for the HUD's interact prompt (drawn fixed at the top-left by HudScene), or null
+    this.interactPrompt = null;
     this.boundsTmp = new Phaser.Geom.Rectangle();
 
     this.cameras.main.fadeIn(250, 255, 255, 255);
@@ -121,11 +118,11 @@ export class WorldScene extends Phaser.Scene {
   }
 
   /** Called by behaviours: `activate()` runs when the player interacts while this is the nearest in range. */
-  addInteractable({ target, verb, activate }) {
-    this.interactables.push({ target, verb, activate });
+  addInteractable({ target, verb, name, activate }) {
+    this.interactables.push({ target, verb, name, activate });
   }
 
-  /** Pick the nearest interactable in range and place the prompt above the player. */
+  /** Pick the nearest interactable in range and set the HUD prompt text ("E · View — Title"). */
   updateInteractFocus() {
     const body = this.player.body;
     let best = null;
@@ -140,11 +137,9 @@ export class WorldScene extends Phaser.Scene {
     this.focusTarget = best;
 
     const show = Boolean(best) && !this.isDialogueLocked && !this.isTravelling;
-    this.prompt.setVisible(show);
-    if (show) {
-      this.prompt.setText(`${this.inputState.interactGlyph} · ${best.verb}`);
-      this.prompt.setPosition(this.player.x, body.top - 6);
-    }
+    this.interactPrompt = show
+      ? `${this.inputState.interactGlyph} · ${best.verb}${best.name ? ` — ${best.name}` : ''}`
+      : null;
   }
 
   /** Interact (E / Space / gamepad A·X / ACT): CTA or close an open dialogue, else use the nearest object. */

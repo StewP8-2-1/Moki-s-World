@@ -64,7 +64,7 @@ The game and the editor both call `create()`, so what you see in the editor is w
 
 Any movement input closes a locked dialogue and returns the camera to `follow`.
 
-**Object interaction.** Behaviours in `src/world/behaviors.js` register each painting, promo and link with `scene.addInteractable({ target, verb, activate })`. Every frame, `WorldScene.updateInteractFocus()` picks the interactable whose bounds are nearest the player's body, within 100 px. It shows a prompt above the player and, through `HudScene.update()`, the contextual ACT button. `interact()` activates that object; if a dialogue is already open, it follows the CTA when there is one and otherwise closes the dialogue. Clicking or tapping an object runs the same `activate` path, so every input type behaves the same. Portals stay overlap-based.
+**Object interaction.** Behaviours in `src/world/behaviors.js` register each painting, promo and link with `scene.addInteractable({ target, verb, name, activate })`. Every frame, `WorldScene.updateInteractFocus()` picks the interactable whose bounds are nearest the player's body, within 100 px, and sets `interactPrompt` (e.g. "E · View — Renaissance"). `HudScene.update()` draws that prompt fixed at the top-left of the screen and shows the contextual ACT button. `interact()` activates that object; if a dialogue is already open, it follows the CTA when there is one and otherwise closes the dialogue. Clicking or tapping an object runs the same `activate` path, so every input type behaves the same. Portals stay overlap-based.
 
 | Action | Keyboard | Gamepad | Touch / mouse |
 |---|---|---|---|
